@@ -1,0 +1,2 @@
+# OTA_continue
+之前的bootloader进行了初识，现在完整的程序框架进行OTA的学习
