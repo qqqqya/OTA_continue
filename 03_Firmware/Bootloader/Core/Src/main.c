@@ -75,7 +75,7 @@ int main(void)
    Key_IO_Init();
   debug_log_init();///初始化日志
 //      USART_SendChar(USART1, 'A');
-// Ymodem_Receive(recv_buf);
+Ymodem_Receive(recv_buf);
 //EreaseAppSector(FLASH_Sector_3);//擦除第3个扇区
 //Flash_Write(0x0800C000, 0x12345678);
 Jump2App();

@@ -206,14 +206,14 @@ int32_t Ymodem_Receive (uint8_t *buf)
 
                     /* Erase the needed pages where the user application will be loaded */
                     /* Define the number of page to be erased */
-                    NbrOfPage = FLASH_PagesMask(size);
+                    // NbrOfPage = FLASH_PagesMask(size);
 
                     /* Erase the FLASH pages */
 										//����App
 //                    for (EraseCounter = 0; (EraseCounter < NbrOfPage) && (FLASHStatus == FLASH_COMPLETE); EraseCounter++)
 //                    {
 //                      FLASHStatus = FLASH_ErasePage(FlashDestination + (PageSize * EraseCounter));
-					//                    }//后面有F4的  这里不进行擦除
+//                    }//后面有F4的  这里不进行擦除
                     Send_Byte(ACK);
                     Send_Byte(CRC16);
                   }
@@ -229,23 +229,23 @@ int32_t Ymodem_Receive (uint8_t *buf)
                 /* Data packet */
                 else
                 {
-                  memcpy(buf_ptr, packet_data + PACKET_HEADER, packet_length);
-                  RamSource = (uint32_t)buf;
-                  for (j = 0;(j < packet_length) && (FlashDestination <  BackAppAddress + size);j += 4)
-                  {
-                    /* Program the data received into STM32F10x Flash */
-                    FLASH_ProgramWord(FlashDestination, *(uint32_t*)RamSource);
+                    // memcpy(buf_ptr, packet_data + PACKET_HEADER, packet_length);
+                    // RamSource = (uint32_t)buf;
+                    // for (j = 0;(j < packet_length) && (FlashDestination <  BackAppAddress + size);j += 4)
+                    // {
+                    //   /* Program the data received into STM32F10x Flash */
+                    //   FLASH_ProgramWord(FlashDestination, *(uint32_t*)RamSource);
 
-                    if (*(uint32_t*)FlashDestination != *(uint32_t*)RamSource)
-                    {
-                      /* End session */
-                      Send_Byte(CA);
-                      Send_Byte(CA);
-                      return -2;
-                    }
-                    FlashDestination += 4;
-                    RamSource += 4;
-                  }
+                    //   if (*(uint32_t*)FlashDestination != *(uint32_t*)RamSource)
+                    //   {
+                    //     /* End session */
+                    //     Send_Byte(CA);
+                    //     Send_Byte(CA);
+                    //     return -2;
+                    //   }
+                    //   FlashDestination += 4;
+                    //   RamSource += 4;
+                    // }
                   Send_Byte(ACK);
                 }
                 packets_received ++;

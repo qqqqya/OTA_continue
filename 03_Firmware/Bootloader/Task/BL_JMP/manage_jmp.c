@@ -44,7 +44,7 @@ void Jump2App(void){
 
         /* 屏蔽所有中断，防止在跳转过程中，中断干扰出现异常 */
         __disable_irq();
-
+        NVIC_SetVectorTable(FALSH_BASE_ADDR, 0x8000);
         RCC_DeInit();
         /* 用户代码区第二个 字 为程序开始地址(复位地址) */
         JumpAddress = *(__IO uint32_t *) (ApplicationAddress + 4);
