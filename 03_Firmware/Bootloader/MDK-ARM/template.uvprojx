@@ -274,7 +274,7 @@
               <OCR_RVCT4>
                 <Type>1</Type>
                 <StartAddress>0x8000000</StartAddress>
-                <Size>0x80000</Size>
+                <Size>0x8000</Size>
               </OCR_RVCT4>
               <OCR_RVCT5>
                 <Type>1</Type>
@@ -336,7 +336,7 @@
               <MiscControls></MiscControls>
               <Define>USE_STDPERIPH_DRIVER,STM32F411xE</Define>
               <Undefine></Undefine>
-              <IncludePath>..\MDK-ARM;..\Core\Inc;..\Drivers\STM32F4xx_StdPeriph_Driver\inc;..\Drivers\CMSIS\Device\ST\STM32F4xx\Include;..\Drivers\CMSIS\Include;..\Middlewares\easylogger\inc;..\Middlewares\RTT</IncludePath>
+              <IncludePath>..\MDK-ARM;..\Core\Inc;..\Drivers\STM32F4xx_StdPeriph_Driver\inc;..\Drivers\CMSIS\Device\ST\STM32F4xx\Include;..\Drivers\CMSIS\Include;..\Middlewares\easylogger\inc;..\Middlewares\RTT;..\Task\BL_JMP;..\Task\Debug;..\Middlewares\Ymodem</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -404,6 +404,16 @@
               <FileName>stm32f4xx_conf.h</FileName>
               <FileType>5</FileType>
               <FilePath>..\Core\Inc\stm32f4xx_conf.h</FilePath>
+            </File>
+            <File>
+              <FileName>Flash.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Core\Src\Flash.c</FilePath>
+            </File>
+            <File>
+              <FileName>Usart.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Core\Src\Usart.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -1632,6 +1642,36 @@
               <FileName>SEGGER_RTT_printf.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\Middlewares\RTT\SEGGER_RTT_printf.c</FilePath>
+            </File>
+          </Files>
+        </Group>
+        <Group>
+          <GroupName>Task</GroupName>
+          <Files>
+            <File>
+              <FileName>manage_jmp.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Task\BL_JMP\manage_jmp.c</FilePath>
+            </File>
+            <File>
+              <FileName>debug_log.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Task\Debug\debug_log.c</FilePath>
+            </File>
+          </Files>
+        </Group>
+        <Group>
+          <GroupName>Middlewares/Ymodem</GroupName>
+          <Files>
+            <File>
+              <FileName>common.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Middlewares\Ymodem\common.c</FilePath>
+            </File>
+            <File>
+              <FileName>ymodem.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Middlewares\Ymodem\ymodem.c</FilePath>
             </File>
           </Files>
         </Group>

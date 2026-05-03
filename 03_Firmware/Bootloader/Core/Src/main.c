@@ -9,7 +9,10 @@
 #include "main.h"
 #include "tim.h"
 #include "gpio.h"
-#include "elog.h"
+#include "usart.h"
+#include "debug_log.h"
+#include "ymodem.h"
+#include "manage_jmp.h"
 // 全局定义 STM32F411xE 或者 STM32F401xx
 // 当前定义 STM32F411xE
 
@@ -36,6 +39,8 @@ RCC_ClocksTypeDef RCC_Clocks;
   *For more information please visit: https://github.com/WeActTC/MiniF4-STM32F4x1
   *更多信息请访问：https://gitee.com/WeActTC/MiniF4-STM32F4x1
   */
+
+  uint8_t recv_buf[1024];//数据区最大1024  还有128的
 /**
   * @brief  Main program
   * @param  None
@@ -62,56 +67,68 @@ int main(void)
   /* Add your application code here */
   /* Insert 50 ms delay */
   Delay(50);
-	
-  GPIO_Config();
+	//  GPIO_Config();
   TIM_Config();   
-  
-  
-   	elog_init();
-	/* set EasyLogger log format */
-	elog_set_fmt(ELOG_LVL_ASSERT, ELOG_FMT_ALL);
-	elog_set_fmt(ELOG_LVL_ERROR, ELOG_FMT_LVL | ELOG_FMT_TAG | ELOG_FMT_TIME);
-	elog_set_fmt(ELOG_LVL_WARN, ELOG_FMT_LVL | ELOG_FMT_TAG | ELOG_FMT_TIME);
-	elog_set_fmt(ELOG_LVL_INFO, ELOG_FMT_LVL | ELOG_FMT_TAG | ELOG_FMT_TIME);
-	elog_set_fmt(ELOG_LVL_DEBUG, ELOG_FMT_ALL & ~(ELOG_FMT_FUNC | ELOG_FMT_T_INFO | ELOG_FMT_P_INFO));
-	elog_set_fmt(ELOG_LVL_VERBOSE, ELOG_FMT_ALL & ~(ELOG_FMT_FUNC | ELOG_FMT_T_INFO | ELOG_FMT_P_INFO));
-	/* start EasyLogger */
-	elog_start();
-	
+  TIM_Cmd(TIM3,DISABLE);//STD文件进行跳转的的时候  很多差异
+  USART1_Init();
+  Led_IO_Init();
+   Key_IO_Init();
+  debug_log_init();///初始化日志
+//      USART_SendChar(USART1, 'A');
+// Ymodem_Receive(recv_buf);
+//EreaseAppSector(FLASH_Sector_3);//擦除第3个扇区
+//Flash_Write(0x0800C000, 0x12345678);
+Jump2App();
+
   /* Infinite loop */
   while (1)
-  {
-#if soft_pwm
-		/* C13 呼吸灯测试 */
-		static uint8_t pwmset;
-		static uint16_t time;
-		static uint8_t timeflag;
-		static uint8_t timecount;
+  {	
+//	  ///按下按键点亮--scan return 1
+//    if(Key_Scan()){
+//      USART_SendChar(USART1, 'A');}
+////		LED_ON;
+////      log_i("LED_ON");
+////    }
+//	  else{
+////      LED_OFF;
+////      log_i("LED_OFF");
+////      USART_SendChar(USART1, 'B');
+//    }
+//	Delay(1000);
+//USART1_Init(void);
+//USART_SendChar(USART_TypeDef* USARTx, uint8_t data);
+	
+//#if 0
+//		/* C13 呼吸灯测试 */
+//		static uint8_t pwmset;
+//		static uint16_t time;
+//		static uint8_t timeflag;
+//		static uint8_t timecount;
 
-		 /* 呼吸灯 */
-		if(timeflag == 0)
-		{
-			time ++;
-			if(time >= 1600) timeflag = 1;
-		}
-		else
-		{
-			time --;
-			if(time == 0) timeflag = 0;
-		}
+//		 /* 呼吸灯 */
+//		if(timeflag == 0)
+//		{
+//			time ++;
+//			if(time >= 1600) timeflag = 1;
+//		}
+//		else
+//		{
+//			time --;
+//			if(time == 0) timeflag = 0;
+//		}
 
-		/* 占空比设置 */
-		pwmset = time/80;
+//		/* 占空比设置 */
+//		pwmset = time/80;
 
-		/* 20ms 脉宽 */
-		if(timecount > 20) timecount = 0;
-		else timecount ++;
+//		/* 20ms 脉宽 */
+//		if(timecount > 20) timecount = 0;
+//		else timecount ++;
 
-		if(timecount >= pwmset ) GPIO_SetBits(LED_C13_PORT,LED_C13_PIN);
-		else GPIO_ResetBits(LED_C13_PORT,LED_C13_PIN);
-		
-		Delay(1);
-#endif
+//		if(timecount >= pwmset ) GPIO_SetBits(LED_C13_PORT,LED_C13_PIN);
+//		else GPIO_ResetBits(LED_C13_PORT,LED_C13_PIN);
+//		
+//		Delay(1);
+//#endif
 	}
 }
 
