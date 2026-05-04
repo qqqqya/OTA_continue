@@ -47,15 +47,28 @@ void Key_IO_Init(void)
 
 uint8_t Key_Scan(void)
 {
-    if(GPIO_ReadInputDataBit(GPIOA,GPIO_Pin_0) == Bit_RESET)
+	    // 第一次检测
+    if(GPIO_ReadInputDataBit(GPIOA, GPIO_Pin_0) == Bit_RESET)
     {
-      Delay(50);
-      if(GPIO_ReadInputDataBit(GPIOA,GPIO_Pin_0) == Bit_RESET)
-      {
-        return 1;
-      }
+        // 不使用阻塞Delay，快速二次判断（无延时，不影响串口）
+        for(uint16_t i=0; i<1000; i++); // 空循环消抖，极快，不阻塞业务
+        if(GPIO_ReadInputDataBit(GPIOA, GPIO_Pin_0) == Bit_RESET)
+        {
+            // 等待按键松开（防止一直触发）
+            while(GPIO_ReadInputDataBit(GPIOA, GPIO_Pin_0) == Bit_RESET);
+            return 1;
+        }
     }
     return 0;
+//    if(GPIO_ReadInputDataBit(GPIOA,GPIO_Pin_0) == Bit_RESET)
+//    {
+//      Delay(50);////////致命阻塞
+//      if(GPIO_ReadInputDataBit(GPIOA,GPIO_Pin_0) == Bit_RESET)
+//      {
+//        return 1;
+//      }
+//    }
+//    return 0;
 }
 
 void Led_IO_Init(void)

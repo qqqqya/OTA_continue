@@ -104,7 +104,7 @@ int main(void)
   MX_GPIO_Init();//LOW --LIGHT
   MX_USART1_UART_Init();
   /* USER CODE BEGIN 2 */
-printf("Hello app!\r\n");
+	printf("Hello app!\r\n");
 /* 
   HAL_UART_Receive_IT(&huart1, g_recv_data, 1);*/  
   /* USER CODE END 2 */

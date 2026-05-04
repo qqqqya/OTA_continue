@@ -74,12 +74,22 @@ int main(void)
 	Led_IO_Init();
 	Key_IO_Init();
 	//      USART_SendChar(USART1, 'A');
-	Ymodem_Receive(recv_buf);
 	debug_log_init();///初始化日志
 	//EreaseAppSector(FLASH_Sector_3);//擦除第3个扇区
 	//Flash_Write(0x0800C000, 0x12345678);
+#if 0
+	Ymodem_Receive(recv_buf);
 	Jump2App();
-
+#endif
+#if 1
+  if(1==Key_Scan()){//按下按键
+     Ymodem_Receive(recv_buf);
+     Jump2App();
+    }
+    else {
+      Jump2App();
+    }
+#endif
   /* Infinite loop */
   while (1)
   {	
