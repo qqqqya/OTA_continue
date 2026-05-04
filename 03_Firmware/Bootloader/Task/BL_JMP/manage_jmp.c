@@ -58,6 +58,33 @@ void Jump2App(void){
         Jump2Application();
     }
   }
+uint16_t app_size = 0;
+/**将back写入app地址
+ * 先提取back 再将back写入app地址--erase app地址--write back到app地址
+ */
+int8_t Back2App(void){
+    uint32_t FlashDestination = ApplicationAddress;//APP地址        08008000
+    uint32_t BackupSource = BackupApplicationAddress;//备份APP地址  08020000
+    uint32_t j = 0;
+
+    if(app_size < 0  || app_size > (0x18000 - 1)){//APP地址0x08008000-0x08020000 96k
+        printf("app size error\r\n");
+        return -1;
+    }
+    ///copy back to app
+    for (j = 0;j < app_size;j += 4)
+    {
+      Flash_Write(FlashDestination, *(uint32_t*)BackupSource);//destin 是app地址
+          /* Check the written data */
+      if (*(uint32_t*)FlashDestination != *(uint32_t*)BackupSource)
+      {/***  *(uint32_t*)0x08008000 → 读取刚写入的主 APP 区数据--------*(uint32_t*)0x08020000 → 备份区原始数据 */
+        return -2;
+      }
+      FlashDestination += 4;
+      BackupSource += 4;
+    }
+    return 0;
+}
 #if 0
         // NVIC_SetVectorTable(FALSH_BASE_ADDR, 0x8000);
 //        NVIC_SetVectorTable(FALSH_BASE_ADDR, 0x0000);

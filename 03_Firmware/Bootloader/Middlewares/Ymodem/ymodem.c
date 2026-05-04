@@ -26,6 +26,7 @@
 /* Includes ------------------------------------------------------------------*/
 #include "common.h"
 #include "stm32f4xx_flash.h"
+#include "ymodem.h"
 #include "manage_jmp.h"//application address
 #include "Flash.h"  //擦除函数
 
@@ -34,14 +35,14 @@
 /* Private macro -------------------------------------------------------------*/
 /* Private variables ---------------------------------------------------------*/
 uint8_t file_name[FILE_NAME_LENGTH];
-uint32_t FlashDestination = ApplicationAddress;//APP地址 
+uint32_t FlashDestination = BackupApplicationAddress;//备份APP地址 0x08020000
 uint16_t PageSize = PAGE_SIZE;
 uint32_t EraseCounter = 0x0;
 uint32_t NbrOfPage = 0;
 FLASH_Status FLASHStatus = FLASH_COMPLETE;
 uint32_t RamSource;
-extern uint8_t tab_1024[1024];
-
+// extern uint8_t tab_1024[1024];
+extern uint16_t app_size;
 /* Private function prototypes -----------------------------------------------*/
 /* Private functions ---------------------------------------------------------*/
 
@@ -149,9 +150,9 @@ int32_t Ymodem_Receive (uint8_t *buf)
   int32_t i, j, packet_length, session_done, file_done, packets_received, errors, session_begin, size = 0;
 
   /* Initialize FlashDestination variable */
-  FlashDestination = ApplicationAddress;//APP地址 
+  FlashDestination = BackupApplicationAddress;//备份APP地址 
 
-  for (session_done = 0, errors = 0, session_begin = 0; ;)//��ʼ������������ѭ��
+  for (session_done = 0, errors = 0, session_begin = 0; ;)//开始循环
   {
     for (packets_received = 0, file_done = 0, buf_ptr = buf; ;)
     {
@@ -195,7 +196,7 @@ int32_t Ymodem_Receive (uint8_t *buf)
                     }
                     file_size[i++] = '\0';
                     Str2Int(file_size, &size);
-
+                    app_size = size; // 将文件大小存储到全局变量中
                     /* Test the size of the image to be sent */
                     /* Image size is greater than Flash size */
                     if (size > (FLASH_SIZE - 1))
@@ -216,7 +217,8 @@ int32_t Ymodem_Receive (uint8_t *buf)
 //                    {
 //                      FLASHStatus = FLASH_ErasePage(FlashDestination + (PageSize * EraseCounter));
 //                    }//后面有F4的  这里不进行擦除
-                    if(1==Flash_erase(ApplicationAddress, size)){//APP地址，size之前已经解析出来--文件大小
+                    // if(1==Flash_erase(ApplicationAddress, size)){//APP地址，size之前已经解析出来--文件大小
+                    if(1==Flash_erase(BackupApplicationAddress, size)){//APP地址，size之前已经解析出来--文件大小
                       //擦除失败 发送end
                       /* End session */
                       Send_Byte(CA);
@@ -240,7 +242,7 @@ int32_t Ymodem_Receive (uint8_t *buf)
                 {   /* write data to flash */
                       memcpy(buf_ptr, packet_data + PACKET_HEADER, packet_length);
                       RamSource = (uint32_t)buf;
-                      for (j = 0;(j < packet_length) && (FlashDestination <  ApplicationAddress + size);j += 4)
+                      for (j = 0;(j < packet_length) && (FlashDestination < BackupApplicationAddress + size);j += 4)
                       {
                         /* Program the data received into STM32F10x Flash */
                         // FLASH_ProgramWord(FlashDestination, *(uint32_t*)RamSource);

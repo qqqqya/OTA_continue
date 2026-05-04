@@ -66,33 +66,63 @@ int main(void)
 
 	/* Add your application code here */
 	/* Insert 50 ms delay */
-	Delay(50);
+	// Delay(50);
 	//  GPIO_Config();
 	TIM_Config();   
 	TIM_Cmd(TIM3,DISABLE);//STD文件进行跳转的的时候  很多差异
 	USART1_Init();
 	Led_IO_Init();
 	Key_IO_Init();
-	//      USART_SendChar(USART1, 'A');
 	debug_log_init();///初始化日志
+  log_i("Bootloader Start!");
 	//EreaseAppSector(FLASH_Sector_3);//擦除第3个扇区
 	//Flash_Write(0x0800C000, 0x12345678);
+
+#if 1
+  if(1==Key_Scan()){//按下按键
+      /**1. 接收bin  Bsec擦写flash 备份APP地址 */
+      Ymodem_Receive(recv_buf);
+      /**2. 将Bsec写入Asec */
+      if(0 == Back2App()){
+      /**2.5 备份写入成功-JMP */
+        Jump2App();
+      }else{
+        log_e("Back2App failed! Error code: %d", Back2App());
+        //写入失败 打印信息--后面进入while循环 重新下载
+      }
+          // /**3. 跳转到ASec--APP地址 */
+          // Jump2App();
+      }
+  else {//未按下按键 未进入升级模式
+    Jump2App();
+  }
+#endif  //如果上面没有jmp成功  就会进入循环
+
 #if 0
 	Ymodem_Receive(recv_buf);
 	Jump2App();
 #endif
-#if 1
-  if(1==Key_Scan()){//按下按键
-     Ymodem_Receive(recv_buf);
-     Jump2App();
-    }
-    else {
-      Jump2App();
-    }
-#endif
   /* Infinite loop */
   while (1)
   {	
+    /**上面没有jmp成功  就会进入循环 */
+    log_a("No valid application found. Please press the button to enter upgrade mode.");
+    if(1==Key_Scan()){//按下按键
+      /**1. 接收bin  Bsec擦写flash 备份APP地址 */
+      Ymodem_Receive(recv_buf);
+      /**2. 将Bsec写入Asec */
+      if(0 == Back2App()){
+      /**2.5 备份写入成功-JMP */
+        Jump2App();
+      }else{
+        log_e("Back2App failed! Error code: %d", Back2App());
+        //写入失败 打印信息--后面进入while循环 重新下载
+      }
+    }
+    Delay(50);
+
+	}
+}
 //	  ///按下按键点亮--scan return 1
 //    if(Key_Scan()){
 //      USART_SendChar(USART1, 'A');}
@@ -139,8 +169,6 @@ int main(void)
 //		
 //		Delay(1);
 //#endif
-	}
-}
 
 /**
   * @brief  Inserts a delay time.
