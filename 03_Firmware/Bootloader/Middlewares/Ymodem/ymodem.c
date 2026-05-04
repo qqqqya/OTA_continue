@@ -26,13 +26,15 @@
 /* Includes ------------------------------------------------------------------*/
 #include "common.h"
 #include "stm32f4xx_flash.h"
+#include "manage_jmp.h"//application address
+#include "Flash.h"  //擦除函数
 
 /* Private typedef -----------------------------------------------------------*/
 /* Private define ------------------------------------------------------------*/
 /* Private macro -------------------------------------------------------------*/
 /* Private variables ---------------------------------------------------------*/
 uint8_t file_name[FILE_NAME_LENGTH];
-uint32_t FlashDestination = BackAppAddress; 
+uint32_t FlashDestination = ApplicationAddress;//APP地址 
 uint16_t PageSize = PAGE_SIZE;
 uint32_t EraseCounter = 0x0;
 uint32_t NbrOfPage = 0;
@@ -147,7 +149,7 @@ int32_t Ymodem_Receive (uint8_t *buf)
   int32_t i, j, packet_length, session_done, file_done, packets_received, errors, session_begin, size = 0;
 
   /* Initialize FlashDestination variable */
-  FlashDestination = BackAppAddress;
+  FlashDestination = ApplicationAddress;//APP地址 
 
   for (session_done = 0, errors = 0, session_begin = 0; ;)//��ʼ������������ѭ��
   {
@@ -214,6 +216,13 @@ int32_t Ymodem_Receive (uint8_t *buf)
 //                    {
 //                      FLASHStatus = FLASH_ErasePage(FlashDestination + (PageSize * EraseCounter));
 //                    }//后面有F4的  这里不进行擦除
+                    if(1==Flash_erase(ApplicationAddress, size)){//APP地址，size之前已经解析出来--文件大小
+                      //擦除失败 发送end
+                      /* End session */
+                      Send_Byte(CA);
+                      Send_Byte(CA);
+                      return -1;
+                    }
                     Send_Byte(ACK);
                     Send_Byte(CRC16);
                   }
@@ -228,24 +237,25 @@ int32_t Ymodem_Receive (uint8_t *buf)
                 }
                 /* Data packet */
                 else
-                {
-                    // memcpy(buf_ptr, packet_data + PACKET_HEADER, packet_length);
-                    // RamSource = (uint32_t)buf;
-                    // for (j = 0;(j < packet_length) && (FlashDestination <  BackAppAddress + size);j += 4)
-                    // {
-                    //   /* Program the data received into STM32F10x Flash */
-                    //   FLASH_ProgramWord(FlashDestination, *(uint32_t*)RamSource);
-
-                    //   if (*(uint32_t*)FlashDestination != *(uint32_t*)RamSource)
-                    //   {
-                    //     /* End session */
-                    //     Send_Byte(CA);
-                    //     Send_Byte(CA);
-                    //     return -2;
-                    //   }
-                    //   FlashDestination += 4;
-                    //   RamSource += 4;
-                    // }
+                {   /* write data to flash */
+                      memcpy(buf_ptr, packet_data + PACKET_HEADER, packet_length);
+                      RamSource = (uint32_t)buf;
+                      for (j = 0;(j < packet_length) && (FlashDestination <  ApplicationAddress + size);j += 4)
+                      {
+                        /* Program the data received into STM32F10x Flash */
+                        // FLASH_ProgramWord(FlashDestination, *(uint32_t*)RamSource);
+                        Flash_Write(FlashDestination, *(uint32_t*)RamSource);//F4的写函数
+                            /* Check the written data */
+                        if (*(uint32_t*)FlashDestination != *(uint32_t*)RamSource)
+                        {
+                          /* End session */
+                          Send_Byte(CA);
+                          Send_Byte(CA);
+                          return -2;
+                        }
+                        FlashDestination += 4;
+                        RamSource += 4;
+                      }
                   Send_Byte(ACK);
                 }
                 packets_received ++;

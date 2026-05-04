@@ -50,35 +50,35 @@ int main(void)
 {
 	/* Enable Clock Security System(CSS): this will generate an NMI exception
      when HSE clock fails *****************************************************/
-  RCC_ClockSecuritySystemCmd(ENABLE);
-	
- /*!< At this stage the microcontroller clock setting is already configured, 
-       this is done through SystemInit() function which is called from startup
-       files before to branch to application main.
-       To reconfigure the default setting of SystemInit() function, 
-       refer to system_stm32f4xx.c file */
+	RCC_ClockSecuritySystemCmd(ENABLE);
 
-  /* SysTick end of count event each 1ms */
-  SystemCoreClockUpdate();
-  RCC_GetClocksFreq(&RCC_Clocks);
-  SysTick_Config(RCC_Clocks.HCLK_Frequency / 1000);
-  
-	
-  /* Add your application code here */
-  /* Insert 50 ms delay */
-  Delay(50);
+	/*!< At this stage the microcontroller clock setting is already configured, 
+	   this is done through SystemInit() function which is called from startup
+	   files before to branch to application main.
+	   To reconfigure the default setting of SystemInit() function, 
+	   refer to system_stm32f4xx.c file */
+
+	/* SysTick end of count event each 1ms */
+	SystemCoreClockUpdate();
+	RCC_GetClocksFreq(&RCC_Clocks);
+	SysTick_Config(RCC_Clocks.HCLK_Frequency / 1000);
+
+
+	/* Add your application code here */
+	/* Insert 50 ms delay */
+	Delay(50);
 	//  GPIO_Config();
-  TIM_Config();   
-  TIM_Cmd(TIM3,DISABLE);//STD文件进行跳转的的时候  很多差异
-  USART1_Init();
-  Led_IO_Init();
-   Key_IO_Init();
-  debug_log_init();///初始化日志
-//      USART_SendChar(USART1, 'A');
-Ymodem_Receive(recv_buf);
-//EreaseAppSector(FLASH_Sector_3);//擦除第3个扇区
-//Flash_Write(0x0800C000, 0x12345678);
-Jump2App();
+	TIM_Config();   
+	TIM_Cmd(TIM3,DISABLE);//STD文件进行跳转的的时候  很多差异
+	USART1_Init();
+	Led_IO_Init();
+	Key_IO_Init();
+	//      USART_SendChar(USART1, 'A');
+	Ymodem_Receive(recv_buf);
+	debug_log_init();///初始化日志
+	//EreaseAppSector(FLASH_Sector_3);//擦除第3个扇区
+	//Flash_Write(0x0800C000, 0x12345678);
+	Jump2App();
 
   /* Infinite loop */
   while (1)

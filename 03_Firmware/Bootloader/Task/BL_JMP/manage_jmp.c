@@ -30,9 +30,7 @@
 /* Includes ------------------------------------------------------------------*/
 #include "manage_jmp.h"
 
-#define FALSH_BASE_ADDR  ((uint32_t)0x08000000)//+ 0x00019000
-// #define FALSH_BASE_ADDR 0x08000000//+ 0x00019000
-#define ApplicationAddress 0x08008000 //APP程序的启动地址-MSP
+
 typedef void (*pFunc)(void);      //pFunc 是变量名'，类型是 void (*)(void)。
 pFunc Jump2Application;//函数指针类型--变量 
                         //完全等价与 void (*Jump2Application)(void) 
