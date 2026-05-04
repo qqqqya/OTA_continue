@@ -41,6 +41,7 @@ RCC_ClocksTypeDef RCC_Clocks;
   */
 
   uint8_t recv_buf[1024];//数据区最大1024  还有128的
+  int32_t fl_size;
 /**
   * @brief  Main program
   * @param  None
@@ -81,13 +82,14 @@ int main(void)
 #if 1
   if(1==Key_Scan()){//按下按键
       /**1. 接收bin  Bsec擦写flash 备份APP地址 */
-      Ymodem_Receive(recv_buf);
+      fl_size = Ymodem_Receive(recv_buf);
       /**2. 将Bsec写入Asec */
-      if(0 == Back2App()){
+      // if(0 == Backup2App()){
+      if(0 == AES_Backup2App(fl_size)){
       /**2.5 备份写入成功-JMP */
         Jump2App();
       }else{
-        log_e("Back2App failed! Error code: %d", Back2App());
+        log_e("Backup2App failed! Error code: %d", Backup2App());
         //写入失败 打印信息--后面进入while循环 重新下载
       }
           // /**3. 跳转到ASec--APP地址 */
@@ -109,13 +111,14 @@ int main(void)
     log_a("No valid application found. Please press the button to enter upgrade mode.");
     if(1==Key_Scan()){//按下按键
       /**1. 接收bin  Bsec擦写flash 备份APP地址 */
-      Ymodem_Receive(recv_buf);
+      fl_size =Ymodem_Receive(recv_buf);
       /**2. 将Bsec写入Asec */
-      if(0 == Back2App()){
+      // if(0 == Backup2App()){
+      if(0 == AES_Backup2App(fl_size)){
       /**2.5 备份写入成功-JMP */
         Jump2App();
       }else{
-        log_e("Back2App failed! Error code: %d", Back2App());
+        log_e("Backup2App failed! Error code: %d", Backup2App());
         //写入失败 打印信息--后面进入while循环 重新下载
       }
     }
