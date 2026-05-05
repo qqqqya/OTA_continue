@@ -43,10 +43,8 @@ unsigned char Key[32]={0x31,0X32,0x31,0X32,0x31,0X32,0x31,0X32,0x31,0X32,0x31,0X
                        0x31,0X32,0x31,0X32,0x31,0X32,0x31,0X32,0x31,0X32,0x31,0X32,0x31,0X32,0x31,0X32};
 int8_t AES_Backup2App(int32_t fl_size){
     uint32_t FlashDestination = ApplicationAddress;//APP地址        08008000
-    uint32_t BackupSource = BackupApplicationAddress;//备份APP地址  08020000
-    uint32_t j = 0;
 
-  uint8_t *pu8_temp = (uint8_t *)BackupApplicationAddress;  //原始数据
+  uint8_t *pu8_temp = (uint8_t *)BackupApplicationAddress;  //原始数据//备份APP地址  08020000
   uint8_t Temp[16];  //原密文数据缓存
   uint8_t *pTemp = Temp;
   u32 AppSize=0;  //升级包的大小
@@ -58,10 +56,11 @@ int8_t AES_Backup2App(int32_t fl_size){
         printf("app size error\r\n");
         return -1;
   }
-  memcpy(pTemp,pu8_temp,16);//缓存原密文数据
+  memcpy(pTemp,pu8_temp,16);//缓存原密文数据-------copy 16个字节出来
+    Aes_IV_key256bit_Decode(IV, pTemp, Key);//向量输入  pTemp（密文输入  明文输出） 秘钥
+  AppSize=(pTemp[15]<<24)+(pTemp[14]<<16)+(pTemp[13]<<8)+pTemp[12]; //铭文APP大小
   pu8_temp += 16;       //指针指向下一个16字节
-    Aes_IV_key256bit_Decode(IV, pTemp, Key);//向量输入  密文输入 秘钥
-  AppSize=(pTemp[15]<<24)+(pTemp[14]<<16)+(pTemp[13]<<8)+pTemp[12];
+
   /*计算需要解密多少次*/
   readDataCount=AppSize/16;
   if(AppSize%16!=0)
@@ -76,15 +75,15 @@ int8_t AES_Backup2App(int32_t fl_size){
   }
 
   //读数据的总次数
-  for(readTime=0;readTime<readDataCount;readTime++)
+  for(readTime=0;readTime<readDataCount;readTime++) //325次 
   {
     //加密原文读取16个字节到临时区中
     pTemp = Temp;
     memcpy(pTemp,pu8_temp,16);
     pu8_temp += 16;
-    Aes_IV_key256bit_Decode(IV,pTemp,Key);//解密数据
-    //解密后的数据存入App运行区中
-    for (uint8_t j = 0;j < 16; j+= 4)
+    Aes_IV_key256bit_Decode(IV,pTemp,Key);//解密数据 
+    //解密后的数据存入App运行区中   pTemp
+    for (uint8_t j = 0;j < 16; j+= 4) //每次16个字节  写入4个字节 循环readDataCount次
     {
       Flash_Write(FlashDestination,*(uint32_t*)pTemp);
       if (*(uint32_t*)FlashDestination != *(uint32_t*)pTemp)
@@ -134,7 +133,7 @@ int8_t Backup2App(void){
         return -1;
     }
     ///copy back to app
-    for (j = 0;j < app_size;j += 4)
+    for (j = 0;j < app_size;j += 4) //每次写入4个字节
     {
       Flash_Write(FlashDestination, *(uint32_t*)BackupSource);//destin 是app地址
           /* Check the written data */
