@@ -26,24 +26,22 @@
 /* Includes ------------------------------------------------------------------*/
 #include "common.h"
 #include "stm32f4xx_flash.h"
-#include "ymodem.h"
-#include "manage_jmp.h"//application address
-#include "Flash.h"  //擦除函数
-#include "w25qxx_Handler.h"  //为外部flash 提供函数
-
+#include "Boot_Manager.h"
+#include "Flash.h"
+#include "w25qxx_Handler.h"
 /* Private typedef -----------------------------------------------------------*/
 /* Private define ------------------------------------------------------------*/
 /* Private macro -------------------------------------------------------------*/
 /* Private variables ---------------------------------------------------------*/
 uint8_t file_name[FILE_NAME_LENGTH];
-uint32_t FlashDestination = BackupApplicationAddress;//备份APP地址 0x08020000
+uint32_t FlashDestination = BackApplicationAddress; 
 uint16_t PageSize = PAGE_SIZE;
 uint32_t EraseCounter = 0x0;
 uint32_t NbrOfPage = 0;
 FLASH_Status FLASHStatus = FLASH_COMPLETE;
 uint32_t RamSource;
-// extern uint8_t tab_1024[1024];
-extern uint16_t app_size;
+extern uint8_t tab_1024[1024];
+extern int32_t app_size;
 /* Private function prototypes -----------------------------------------------*/
 /* Private functions ---------------------------------------------------------*/
 
@@ -77,6 +75,7 @@ static uint32_t Send_Byte (uint8_t c)
   return 0;
 }
 
+
 /**
   * @brief  Receive a packet from sender
   * @param  data
@@ -95,7 +94,7 @@ static int32_t Receive_Packet (uint8_t *data, int32_t *length, uint32_t timeout)
   uint8_t c;
   *length = 0;
   if (Receive_Byte(&c, timeout) != 0)
-  {///这里超时同步返回-1
+  {
     return -1;
   }
   switch (c)
@@ -151,9 +150,9 @@ int32_t Ymodem_Receive (uint8_t *buf)
   int32_t i, j, packet_length, session_done, file_done, packets_received, errors, session_begin, size = 0;
 
   /* Initialize FlashDestination variable */
-  FlashDestination = BackupApplicationAddress;//备份APP地址 
+  FlashDestination = BackApplicationAddress;
 
-  for (session_done = 0, errors = 0, session_begin = 0; ;)//开始循环
+  for (session_done = 0, errors = 0, session_begin = 0; ;)//��ʼ������������ѭ��
   {
     for (packets_received = 0, file_done = 0, buf_ptr = buf; ;)
     {
@@ -197,7 +196,7 @@ int32_t Ymodem_Receive (uint8_t *buf)
                     }
                     file_size[i++] = '\0';
                     Str2Int(file_size, &size);
-                    app_size = size; // 将文件大小存储到全局变量中
+                    app_size = size;
                     /* Test the size of the image to be sent */
                     /* Image size is greater than Flash size */
                     if (size > (FLASH_SIZE - 1))
@@ -207,16 +206,19 @@ int32_t Ymodem_Receive (uint8_t *buf)
                       Send_Byte(CA);
                       return -1;
                     }
-                    // if(1==Flash_erase(ApplicationAddress, size)){//APP地址，size之前已经解析出来--文件大小
-                    // if(1==Flash_erase(BackupApplicationAddress, size)){//APP地址，size之前已经解析出来--文件大小
-                    //   //擦除失败 发送end
+
+                    /* Erase the needed pages where the user application will be loaded */
+                    /* Define the number of page to be erased */
+//                    NbrOfPage = FLASH_PagesMask(size);
+
+                    /* Erase the FLASH pages */
+                    // if(1 == Flash_erase(BackApplicationAddress,size))
+                    // {
                     //   /* End session */
                     //   Send_Byte(CA);
                     //   Send_Byte(CA);
                     //   return -1;
                     // }
-
-                    ///外部flash  边写边擦除  不需要提前擦除
                     Send_Byte(ACK);
                     Send_Byte(CRC16);
                   }
@@ -231,28 +233,25 @@ int32_t Ymodem_Receive (uint8_t *buf)
                 }
                 /* Data packet */
                 else
-                {   /* write data to flash */
-
-                      memcpy(buf_ptr, packet_data + PACKET_HEADER, packet_length);
-                      W25Q64_WriteData(buf_ptr, packet_length); // 将数据写入外部flash
-                  ///原来写入内部flash  写入的就不需要了
-                      // RamSource = (uint32_t)buf;
-                      // for (j = 0;(j < packet_length) && (FlashDestination < BackupApplicationAddress + size);j += 4)
-                      // {
-                      //   /* Program the data received into STM32F10x Flash */
-                      //   // FLASH_ProgramWord(FlashDestination, *(uint32_t*)RamSource);
-                      //   Flash_Write(FlashDestination, *(uint32_t*)RamSource);//F4的写函数
-                      //       /* Check the written data */
-                      //   if (*(uint32_t*)FlashDestination != *(uint32_t*)RamSource)
-                      //   {
-                      //     /* End session */
-                      //     Send_Byte(CA);
-                      //     Send_Byte(CA);
-                      //     return -2;
-                      //   }
-                      //   FlashDestination += 4;
-                      //   RamSource += 4;
-                      // }
+                {
+                 memcpy(buf_ptr, packet_data + PACKET_HEADER, packet_length);
+                 W25Q64_WriteData(buf_ptr,packet_length);
+                //  RamSource = (uint32_t)buf;
+                //  for (j = 0;(j < packet_length) && (FlashDestination <  BackApplicationAddress + size);j += 4)
+                //  {
+                //    /* Program the data received into STM32F10x Flash */
+                //    //FLASH_ProgramWord(FlashDestination, *(uint32_t*)RamSource);
+                //    Flash_Write(FlashDestination,*(uint32_t*)RamSource);
+                //    if (*(uint32_t*)FlashDestination != *(uint32_t*)RamSource)
+                //    {
+                //      /* End session */
+                //      Send_Byte(CA);
+                //      Send_Byte(CA);
+                //      return -2;
+                //    }
+                //    FlashDestination += 4;
+                //    RamSource += 4;
+                //  }
                   Send_Byte(ACK);
                 }
                 packets_received ++;
@@ -265,10 +264,10 @@ int32_t Ymodem_Receive (uint8_t *buf)
           Send_Byte(CA);
           return -3;
         default:
-         if (session_begin > 0)///只有在会话开始后才统计错误
-         {
+          if (session_begin > 0)
+          {
             errors ++;
-         }
+          }
           if (errors > MAX_ERRORS)
           {
             Send_Byte(CA);

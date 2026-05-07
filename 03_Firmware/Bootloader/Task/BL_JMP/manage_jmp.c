@@ -41,6 +41,172 @@ uint16_t app_size = 0;//APP程序大小
 unsigned char IV[16]={0x31,0X32,0x31,0X32,0x31,0X32,0x31,0X32,0x31,0X32,0x31,0X32,0x31,0X32,0x31,0X32};  
 unsigned char Key[32]={0x31,0X32,0x31,0X32,0x31,0X32,0x31,0X32,0x31,0X32,0x31,0X32,0x31,0X32,0x31,0X32,\
                        0x31,0X32,0x31,0X32,0x31,0X32,0x31,0X32,0x31,0X32,0x31,0X32,0x31,0X32,0x31,0X32};
+u8  Mem_Read_buffer[4096];//读4k  外部flash读数据缓存
+int8_t External_AES_Backup2App(int32_t fl_size){
+    u8 Temp[16];  //原密文数据缓存
+    u8 wirteTime=0;  //一个解析包写入次数
+    u16 readTime=0,readDataCount=0;   //读取数据再解密的次数（每次解密16个字节）
+    u32 AppSize=0;  //升级包的大小
+    //u32 FlashDestination=ApplicationAddress;
+    u16 Read_Memory_Size=0;
+    u32 Read_Memory_index=0;
+    uint8_t *pu8_IV_IN_OUT = IV;
+    uint8_t *pu8_key256bit = Key;
+    uint32_t RamSource = 0;
+    uint32_t AppRunFlashDestination = ApplicationAddress;
+    if(fl_size <= 0)
+    {
+      return -1;
+    }
+    if ((app_size > (0x18010 - 1)) ||\
+    (app_size < 0))
+    {
+      return -1;
+    }
+    //先读一帧，用来解析头文件格式
+    W25Q64_ReadData(Mem_Read_buffer,&Read_Memory_Size);
+    if(Read_Memory_Size  >= 16)
+    {
+      memcpy(Temp,Mem_Read_buffer,16);
+      Aes_IV_key256bit_Decode(pu8_IV_IN_OUT,Temp,pu8_key256bit);//解析得到自定义内容+文件大小
+      AppSize=(Temp[15]<<24)+(Temp[14]<<16)+(Temp[13]<<8)+Temp[12];
+//      log_d("AppSize=%d",AppSize);
+      
+      //计算升级包读取次数
+      readDataCount=AppSize/16;
+      if(AppSize%16!=0)
+      {
+        readDataCount+=1;
+      }
+      Read_Memory_index += 16;
+    }
+
+    //数据帧
+    //将待写入区的内容擦除
+    uint8_t flash_erase_state = Flash_erase(AppRunFlashDestination,AppSize);
+    if(flash_erase_state == 0)
+    {
+      for(readTime=0;readTime<readDataCount;readTime++)
+      {
+        //判断下当前buffer下的数据是否读取完毕
+        if(Read_Memory_index == Read_Memory_Size)
+        {
+          if(2 == W25Q64_ReadData(Mem_Read_buffer,&Read_Memory_Size))
+          {
+            return -1;
+          }
+          Read_Memory_index = 0;
+        }
+        //拷贝16个数据
+        memcpy(Temp,Mem_Read_buffer + Read_Memory_index,16);
+        Read_Memory_index += 16;
+        //解析16个数据
+        Aes_IV_key256bit_Decode(pu8_IV_IN_OUT,Temp,pu8_key256bit);//解析
+        
+        RamSource = (uint32_t)Temp;
+        for (wirteTime = 0;wirteTime<4;wirteTime++)
+        {
+          Flash_Write(AppRunFlashDestination, *(uint32_t*)RamSource);
+          AppRunFlashDestination += 4;
+          RamSource += 4;
+        }
+      }
+      return 0;
+    }
+    else
+    {
+      return -1;
+    }
+
+#if 0
+
+  /* 1、位置？外部flash  写入数据 */
+  // uint8_t *pu8_temp = (uint8_t *)BackupApplicationAddress;  //原始数据//备份APP地址  08020000
+  uint8_t Temp[16];  //原密文数据缓存
+  u32 AppSize=0;  //升级包的大小
+  u8 wirteTime=0;  //一个解析包写入次数----------
+  uint16_t readTime=0,readDataCount=0;   //读取数据再解密的次数（每次解密16个字节
+
+    u16 Read_Memory_Size=0;
+    u32 Read_Memory_index=0;
+    uint32_t RamSource = 0;
+    uint32_t FlashDestination = ApplicationAddress;//APP地址        08008000
+    
+  if(fl_size <= 0)return -1;
+
+  if(app_size < 0  || app_size > (0x18010 - 1)){//96k + 16字节
+        printf("app size error\r\n");
+        return -1;
+  }//先读一帧，用来解析头文件格式
+  W25Q64_ReadData(Mem_Read_buffer,&Read_Memory_Size);
+
+      if(Read_Memory_Size  >= 16)
+    {  
+        memcpy(Temp,Mem_Read_buffer,16);//缓存原密文数据--Mem_Read_buffer-----copy 16个字节出来
+        //解析得到自定义内容+文件大小
+      Aes_IV_key256bit_Decode(IV, Temp, Key);//向量输入  pTemp（密文输入  明文输出） 秘钥
+      AppSize=(Temp[15]<<24)+(Temp[14]<<16)+(Temp[13]<<8)+ Temp[12]; //铭文APP大小
+
+      /*计算需要解密多少次*/
+      readDataCount=AppSize/16;
+      if(AppSize%16!=0)
+      {
+        readDataCount+=1;
+      }
+      Read_Memory_index += 16;//指向下一帧数据
+    }
+
+  /* 2、还是需要擦出的 因为app是内部flash */
+  //擦除运行区数据
+  if(1 == Flash_erase(FlashDestination,AppSize))
+  {
+    return -1;
+  }
+  /* 3、剩余的好像就不用改了把 */
+  //读数据的总次数
+  for(readTime=0;readTime<readDataCount;readTime++) //325次 
+  {
+    /* 3.1//判断下当前buffer下的数据是否读取完毕 */
+        if(Read_Memory_index == Read_Memory_Size)
+        {
+          if(2 == W25Q64_ReadData(Mem_Read_buffer,&Read_Memory_Size))
+          {
+//            log_d("Write_Flash_After_AES_Decode read extern buffer error");
+            return -1;
+          }
+          Read_Memory_index = 0;
+        }
+    //加密原文读取16个字节到临时区中
+    // pTemp = Temp;
+    // memcpy(pTemp,pu8_temp,16);
+    // pu8_temp += 16;
+        memcpy(Temp,(Mem_Read_buffer + Read_Memory_index),16);
+        Read_Memory_index += 16;
+    Aes_IV_key256bit_Decode(IV,Temp,Key);//解密数据 
+
+        RamSource = (uint32_t)Temp;//转存为32位地址
+        for (wirteTime = 0;wirteTime<4;wirteTime++)
+        {
+          Flash_Write(FlashDestination, *(uint32_t*)RamSource);
+          FlashDestination += 4;
+          RamSource += 4;
+        }
+    // //解密后的数据存入App运行区中   pTemp
+    // for (uint8_t j = 0;j < 16; j+= 4) //每次16个字节  写入4个字节 循环readDataCount次
+    // {
+    //   Flash_Write(FlashDestination,*(uint32_t*)pTemp);
+    //   if (*(uint32_t*)FlashDestination != *(uint32_t*)pTemp)
+    //   {
+    //     return -1;
+    //   }
+    //   FlashDestination += 4;
+    //   pTemp += 4;
+    // }
+  }
+  return 0;
+#endif
+}
+
 int8_t AES_Backup2App(int32_t fl_size){
     uint32_t FlashDestination = ApplicationAddress;//APP地址        08008000
 
@@ -110,11 +276,13 @@ void Jump2App(void){
 
         /* Initialize user application's Stack Pointer */
         /* 初始化APP堆栈指针(用户代码区的第一个字用于存放栈顶地址) */
-        __set_MSP(*(__IO uint32_t *) ApplicationAddress);
+        __set_MSP(*(__IO uint32_t *) ApplicationAddress);///将8000的MSP重新设置
 
         /* 类型转换 */
         Jump2Application = (pFunc) JumpAddress;
-
+/*这句话在汇编层面其实就是把0x080081AD 塞进了 PC(程序计数器)
+PC指针瞬间来到了 0x080081AC，这里存放的是APP工程里的
+Reset_Handler 汇编代码。*/
         /* 跳转到 APP */
         Jump2Application();
     }

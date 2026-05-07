@@ -30,7 +30,7 @@
 /* Includes ------------------------------------------------------------------*/
 #include "stm32f4xx_it.h"
 #include "main.h"
-
+volatile uint32_t SysTickUptime = 0;
 /** @addtogroup Template_Project
   * @{
   */
@@ -141,6 +141,8 @@ void PendSV_Handler(void)
   */
 void SysTick_Handler(void)
 {
+  //49 days overflow
+	SysTickUptime++;
   TimingDelay_Decrement();
 }
 

@@ -3,6 +3,7 @@
 
 #include "main.h"
 #include "aes.h"
+#include "w25qxx_Handler.h"
 
 #define FALSH_BASE_ADDR  ((uint32_t)0x08000000)//+ 0x00019000
 // #define FALSH_BASE_ADDR 0x08000000//+ 0x00019000
@@ -11,4 +12,5 @@
 void Jump2App(void);
 int8_t Backup2App(void);
 int8_t AES_Backup2App(int32_t fl_size);
+int8_t External_AES_Backup2App(int32_t fl_size);
 #endif 

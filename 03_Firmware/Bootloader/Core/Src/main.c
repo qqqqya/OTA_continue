@@ -8,11 +8,15 @@
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
 #include "tim.h"
-#include "gpio.h"
-#include "usart.h"
+#include "Gpio.h"
 #include "debug_log.h"
-#include "ymodem.h"
+#include "elog.h"
 #include "manage_jmp.h"
+#include "USART.h"
+#include "Flash.h"
+#include "Ymodem.h"
+#include "Spi.h"
+#include "w25qxx_Handler.h"
 // 全局定义 STM32F411xE 或者 STM32F401xx
 // 当前定义 STM32F411xE
 
@@ -21,7 +25,7 @@
 
 /** @addtogroup Template_Project
   * @{
-  */ 
+  */
 
 /* Private typedef -----------------------------------------------------------*/
 /* Private define ------------------------------------------------------------*/
@@ -39,139 +43,97 @@ RCC_ClocksTypeDef RCC_Clocks;
   *For more information please visit: https://github.com/WeActTC/MiniF4-STM32F4x1
   *更多信息请访问：https://gitee.com/WeActTC/MiniF4-STM32F4x1
   */
-
-  uint8_t recv_buf[1024];//数据区最大1024  还有128的
-  int32_t fl_size;
 /**
   * @brief  Main program
   * @param  None
   * @retval None
   */
+int32_t fil_size = 0;
+uint8_t au8_test[1024]; 
 int main(void)
 {
 	/* Enable Clock Security System(CSS): this will generate an NMI exception
      when HSE clock fails *****************************************************/
-	RCC_ClockSecuritySystemCmd(ENABLE);
+  RCC_ClockSecuritySystemCmd(ENABLE);
+	
+ /*!< At this stage the microcontroller clock setting is already configured, 
+       this is done through SystemInit() function which is called from startup
+       files before to branch to application main.
+       To reconfigure the default setting of SystemInit() function, 
+       refer to system_stm32f4xx.c file */
 
-	/*!< At this stage the microcontroller clock setting is already configured, 
-	   this is done through SystemInit() function which is called from startup
-	   files before to branch to application main.
-	   To reconfigure the default setting of SystemInit() function, 
-	   refer to system_stm32f4xx.c file */
-
-	/* SysTick end of count event each 1ms */
-	SystemCoreClockUpdate();
-	RCC_GetClocksFreq(&RCC_Clocks);
-	SysTick_Config(RCC_Clocks.HCLK_Frequency / 1000);
-
-
-	/* Add your application code here */
-	/* Insert 50 ms delay */
-	// Delay(50);
-	//  GPIO_Config();
-	TIM_Config();   
-	TIM_Cmd(TIM3,DISABLE);//STD文件进行跳转的的时候  很多差异
-	USART1_Init();
-	Led_IO_Init();
+  /* SysTick end of count event each 1ms */
+  SystemCoreClockUpdate();
+  RCC_GetClocksFreq(&RCC_Clocks);
+  SysTick_Config(RCC_Clocks.HCLK_Frequency / 1000);
+  /* Add your application code here */
+  /* Insert 50 ms delay */
+  //Delay(50);
 	Key_IO_Init();
-	debug_log_init();///初始化日志
-  log_i("Bootloader Start!");
-	//EreaseAppSector(FLASH_Sector_3);//擦除第3个扇区
-	//Flash_Write(0x0800C000, 0x12345678);
+	Led_IO_Init();
+  //TIM_Config();
+	USART1_Init();
+	debug_log_init();
+  log_a("This is Bootloader!");
 
-#if 1
-  if(1==Key_Scan()){//按下按键
-      /**1. 接收bin  Bsec擦写flash 备份APP地址 */
-      fl_size = Ymodem_Receive(recv_buf);
-      /**2. 将Bsec写入Asec */
-      // if(0 == Backup2App()){
-      if(0 == AES_Backup2App(fl_size)){
-      /**2.5 备份写入成功-JMP */
-        Jump2App();
-      }else{
-        log_e("Backup2App failed! Error code: %d", Backup2App());
-        //写入失败 打印信息--后面进入while循环 重新下载
-      }
-          // /**3. 跳转到ASec--APP地址 */
-          // Jump2App();
-      }
-  else {//未按下按键 未进入升级模式
+  SPI1_Init();
+  W25Q64_Init();
+	//Ymodem_Receive(au8_test);
+	//JumpToApp();
+  if(Key_Scan())
+  {
+    //按下
+    /*1.下载到备份区*/
+    fil_size = Ymodem_Receive(au8_test);
+    /*2.备份区数据拷贝到A区中*/
+    if(0 == External_AES_Backup2App(fil_size))
+    {
+      Jump2App();
+    }
+    else
+    {
+      //
+    }
+  }
+  else
+  {
     Jump2App();
   }
-#endif  //如果上面没有jmp成功  就会进入循环
-
-#if 0
-	Ymodem_Receive(recv_buf);
-	Jump2App();
-#endif
   /* Infinite loop */
   while (1)
-  {	
-    /**上面没有jmp成功  就会进入循环 */
-    log_a("No valid application found. Please press the button to enter upgrade mode.");
-    if(1==Key_Scan()){//按下按键
-      /**1. 接收bin  Bsec擦写flash 备份APP地址 */
-      fl_size =Ymodem_Receive(recv_buf);
-      /**2. 将Bsec写入Asec */
-      // if(0 == Backup2App()){
-      if(0 == AES_Backup2App(fl_size)){
-      /**2.5 备份写入成功-JMP */
+  {
+    log_e("No Valid App,Please press key and download new App!");
+    if(Key_Scan())
+    {
+      //按下
+      /*1.下载到备份区*/
+      fil_size = Ymodem_Receive(au8_test);
+      /*2.备份区数据拷贝到A区中*/
+      if(0 == External_AES_Backup2App(fil_size))
+      {
         Jump2App();
-      }else{
-        log_e("Backup2App failed! Error code: %d", Backup2App());
-        //写入失败 打印信息--后面进入while循环 重新下载
+      }
+      else
+      {
+        //
       }
     }
     Delay(50);
-
+		// //如果是按下，则Led翻转
+		// if(Key_Scan())
+		// {
+		// 	//log_a("LED ON");
+		// 	USART_SendChar(USART1,'A');
+		// 	LED_ON;
+		// }
+		// else
+		// {
+		// 	USART_SendChar(USART1,'B');
+		// 	//log_a("LED OFF");
+		// 	LED_OFF;
+		// }
 	}
 }
-//	  ///按下按键点亮--scan return 1
-//    if(Key_Scan()){
-//      USART_SendChar(USART1, 'A');}
-////		LED_ON;
-////      log_i("LED_ON");
-////    }
-//	  else{
-////      LED_OFF;
-////      log_i("LED_OFF");
-////      USART_SendChar(USART1, 'B');
-//    }
-//	Delay(1000);
-//USART1_Init(void);
-//USART_SendChar(USART_TypeDef* USARTx, uint8_t data);
-	
-//#if 0
-//		/* C13 呼吸灯测试 */
-//		static uint8_t pwmset;
-//		static uint16_t time;
-//		static uint8_t timeflag;
-//		static uint8_t timecount;
-
-//		 /* 呼吸灯 */
-//		if(timeflag == 0)
-//		{
-//			time ++;
-//			if(time >= 1600) timeflag = 1;
-//		}
-//		else
-//		{
-//			time --;
-//			if(time == 0) timeflag = 0;
-//		}
-
-//		/* 占空比设置 */
-//		pwmset = time/80;
-
-//		/* 20ms 脉宽 */
-//		if(timecount > 20) timecount = 0;
-//		else timecount ++;
-
-//		if(timecount >= pwmset ) GPIO_SetBits(LED_C13_PORT,LED_C13_PIN);
-//		else GPIO_ResetBits(LED_C13_PORT,LED_C13_PIN);
-//		
-//		Delay(1);
-//#endif
 
 /**
   * @brief  Inserts a delay time.

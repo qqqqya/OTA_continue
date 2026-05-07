@@ -187,7 +187,7 @@
             <hadIRAM2>0</hadIRAM2>
             <hadIROM2>0</hadIROM2>
             <StupSel>8</StupSel>
-            <useUlib>1</useUlib>
+            <useUlib>0</useUlib>
             <EndSel>0</EndSel>
             <uLtcg>0</uLtcg>
             <nSecure>0</nSecure>
@@ -336,7 +336,7 @@
               <MiscControls></MiscControls>
               <Define>USE_STDPERIPH_DRIVER,STM32F411xE</Define>
               <Undefine></Undefine>
-              <IncludePath>..\MDK-ARM;..\Core\Inc;..\Drivers\STM32F4xx_StdPeriph_Driver\inc;..\Drivers\CMSIS\Device\ST\STM32F4xx\Include;..\Drivers\CMSIS\Include;..\Middlewares\easylogger\inc;..\Middlewares\RTT;..\Task\BL_JMP;..\Task\Debug;..\Middlewares\Ymodem;..\Middlewares\AES</IncludePath>
+              <IncludePath>..\MDK-ARM;..\Core\Inc;..\Drivers\STM32F4xx_StdPeriph_Driver\inc;..\Drivers\CMSIS\Device\ST\STM32F4xx\Include;..\Drivers\CMSIS\Include;..\Middlewares\easylogger\inc;..\Middlewares\RTT;..\Task\BL_JMP;..\Task\Debug;..\Middlewares\Ymodem;..\Middlewares\AES;..\BSP\W25Qxx</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -414,6 +414,11 @@
               <FileName>Usart.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\Core\Src\Usart.c</FilePath>
+            </File>
+            <File>
+              <FileName>Spi.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Core\Src\Spi.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -1682,6 +1687,21 @@
               <FileName>AES.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\Middlewares\AES\AES.c</FilePath>
+            </File>
+          </Files>
+        </Group>
+        <Group>
+          <GroupName>BSP</GroupName>
+          <Files>
+            <File>
+              <FileName>w25qxx.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\BSP\W25Qxx\w25qxx.c</FilePath>
+            </File>
+            <File>
+              <FileName>w25qxx_Handler.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\BSP\W25Qxx\w25qxx_Handler.c</FilePath>
             </File>
           </Files>
         </Group>
