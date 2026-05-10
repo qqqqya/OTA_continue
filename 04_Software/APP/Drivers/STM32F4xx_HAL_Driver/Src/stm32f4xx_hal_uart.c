@@ -2485,7 +2485,7 @@ void HAL_UART_IRQHandler(UART_HandleTypeDef *huart)
       && ((isrflags & USART_SR_IDLE) != 0U)
       && ((cr1its & USART_CR1_IDLEIE) != 0U))
   {
-    __HAL_UART_CLEAR_IDLEFLAG(huart);
+    // __HAL_UART_CLEAR_IDLEFLAG(huart);
 
     /* Check if DMA mode is enabled in UART */
     if (HAL_IS_BIT_SET(huart->Instance->CR3, USART_CR3_DMAR))

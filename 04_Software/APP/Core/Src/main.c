@@ -19,13 +19,15 @@
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
 #include "cmsis_os.h"
+#include "dma.h"
+#include "spi.h"
 #include "usart.h"
 #include "gpio.h"
-#include "AT24Cxx_Driver.h"
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-
+#include "AT24Cxx_Driver.h"
+#include "w25qxx.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -70,8 +72,8 @@ int main(void)
 {
 
   /* USER CODE BEGIN 1 */
-	SCB->VTOR = 0x08000000 | 0x8000; //设置向量表偏移地�??�??0x08000000	//0x8019000
-	__enable_irq();
+//	SCB->VTOR = 0x08000000 | 0x8000; //设置向量表偏移地�????�????0x08000000	//0x8019000
+//	__enable_irq();
   /* USER CODE END 1 */
 
   /* MCU Configuration--------------------------------------------------------*/
@@ -91,10 +93,13 @@ int main(void)
   /* USER CODE END SysInit */
 
   /* Initialize all configured peripherals */
-  MX_GPIO_Init();//LOW --LIGHT
+  MX_GPIO_Init();
+  MX_DMA_Init();
   MX_USART1_UART_Init();
+  MX_SPI1_Init();
   /* USER CODE BEGIN 2 */
-  ee_CheckOk();
+//  ee_CheckOk();
+  W25Qx_Init();
 	// printf("Hello app!\r\n");
 /* 
   HAL_UART_Receive_IT(&huart1, g_recv_data, 1);*/  
