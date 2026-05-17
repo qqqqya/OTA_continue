@@ -235,6 +235,7 @@ int32_t Ymodem_Receive (uint8_t *buf)
 
                       memcpy(buf_ptr, packet_data + PACKET_HEADER, packet_length);
                       W25Q64_WriteData(buf_ptr, packet_length); // 将数据写入外部flash
+                        ///一直加到4K，再进行写这个lens一般都是128256  去加
                   ///原来写入内部flash  写入的就不需要了
                       // RamSource = (uint32_t)buf;
                       // for (j = 0;(j < packet_length) && (FlashDestination < BackupApplicationAddress + size);j += 4)

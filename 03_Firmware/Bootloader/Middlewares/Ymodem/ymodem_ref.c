@@ -56,7 +56,7 @@ static  int32_t Receive_Byte (uint8_t *c, uint32_t timeout)
 {
   while (timeout-- > 0)
   {
-    if (SerialKeyPressed(c) == 1)
+    if (SerialKeyPressed(c) == 1)//直接获取寄存器的值*c = (uint8_t)USART1->DR;
     {
       return 0;
     }
