@@ -30,6 +30,7 @@
 #include "FreeRTOS.h"
 #include "queue.h"
 #include "common.h"
+#include "semphr.h"
 /* Exported types ------------------------------------------------------------*/
 /* Exported constants --------------------------------------------------------*/
 #define PACKET_SEQNO_INDEX      (1)
@@ -61,7 +62,7 @@
 /* Exported macro ------------------------------------------------------------*/
 
 /* Exported functions ------------------------------------------------------- */
-int32_t Ymodem_Receive (uint8_t *);
+int32_t Ymodem_Receive (uint8_t *,uint8_t *);
 uint8_t Ymodem_Transmit (uint8_t *,const  uint8_t* , uint32_t );
 uint16_t UpdateCRC16(uint16_t crcIn, uint8_t byte);
 uint16_t Cal_CRC16(const uint8_t* data, uint32_t size);

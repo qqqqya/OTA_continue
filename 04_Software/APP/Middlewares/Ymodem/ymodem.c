@@ -23,6 +23,7 @@
  *****************************************************************************/
 /* Includes ------------------------------------------------------------------*/
 #include "ymodem.h"
+
 /* Private typedef -----------------------------------------------------------*/
 /* Private define ------------------------------------------------------------*/
 /* Private macro -------------------------------------------------------------*/
@@ -32,7 +33,10 @@ uint32_t RamSource;
 
 extern QueueHandle_t Q_YmodemReclength;
 
-static uint16_t s_u16_YmodRecLength;
+extern QueueHandle_t Queue_AppDataBuffer;/// 下载buf切换---队列
+extern SemaphoreHandle_t Semaphore_ExtFlashState;/// 外部flash---互斥量
+
+static uint16_t s_u16_YmodRecLength;  //接收数据长度//from RxEvent isr
 /* Private function prototypes -----------------------------------------------*/
 /* Private functions ---------------------------------------------------------*/
 
@@ -48,7 +52,7 @@ static int32_t Receive_Byte(uint8_t *c, uint16_t length, uint32_t timeout)
   HAL_UARTEx_ReceiveToIdle_DMA(&huart1, c, length);
 
   if(pdTRUE == xQueueReceive(Q_YmodemReclength,&s_u16_YmodRecLength,timeout))
-  {
+  {//from RxEvent isr
     return 0;
   }
   return -1;
@@ -136,7 +140,7 @@ static int32_t Receive_Packet (uint8_t *data, int32_t *length, uint32_t timeout)
   */
 uint8_t file_size[FILE_SIZE_LENGTH], *file_ptr;
 int32_t i, packet_length, session_done, file_done, packets_received, errors, session_begin, size = 0;
-int32_t Ymodem_Receive (uint8_t *buf1)
+int32_t Ymodem_Receive (uint8_t *buf1,uint8_t *buf2)
 {
   uint8_t *packet_data;
   packet_data = buf1;
@@ -187,7 +191,17 @@ int32_t Ymodem_Receive (uint8_t *buf1)
                     Str2Int(file_size, &size);
                     //size = (uint32_t)atoi((char *)file_size);
                     //需要擦除某些W25q的扇区，根据size的大小决定
-                    //TODO:通知，不做任何处理
+                    //通知，不做任何处理
+                    int32_t * pu32_size = &size;///这里传的地址之后还要取地址？二级指针？
+                    xQueueSend(Queue_AppDataBuffer,&pu32_size,0);//队列是指针 W25q的扇区，根据size的大小决定
+                      if(packet_data == buf1)//切换buf
+                    {
+                      packet_data = buf2;
+                    }
+                    else
+                    {
+                      packet_data = buf1;
+                    }
                     Send_Byte(ACK);
                     Send_Byte(CRC16);
                   }
@@ -202,7 +216,22 @@ int32_t Ymodem_Receive (uint8_t *buf1)
                 }
                 /* Data packet */
                 else
-                {
+                {///这一段没懂
+                  packet_data += PACKET_HEADER;//跳过头信息
+                  xQueueSend(Queue_AppDataBuffer,&packet_data,0);//// 将数据指针发送到队列
+									packet_data -= PACKET_HEADER;//恢复帧头地址
+									
+                  xSemaphoreTake(Semaphore_ExtFlashState,portMAX_DELAY);//这里只是为了获取防止 其他任务在运行 使用数据
+                  xSemaphoreGive(Semaphore_ExtFlashState);
+
+                  if(packet_data == buf1)//切换buf
+                  {
+                    packet_data = buf2;
+                  }
+                  else
+                  {
+                    packet_data = buf1;
+                  }
                   Send_Byte(ACK);
                 }
                 packets_received ++;
