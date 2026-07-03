@@ -152,6 +152,12 @@ void StartDefaultTask(void *argument)
 
 /* Private application code --------------------------------------------------*/
 /* USER CODE BEGIN Application */
+/**
+  * @brief  接收中断回调函数-dma接收
+  * @param  huart: UART handle pointer
+  * @param  Size: Number of bytes received
+  * @retval None
+  */
 void HAL_UARTEx_RxEventCallback(UART_HandleTypeDef *huart,uint16_t Size)
 {
     UNUSED(huart);

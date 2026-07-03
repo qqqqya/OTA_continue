@@ -19,7 +19,9 @@
  * @version V1.0 2024-09-13
  *
  * @note 1 tab == 4 spaces!
- * 
+ * PA9为USART1_TX，PA10为USART1_RX
+ * PA9为USART1_TX，PA10为USART1_RX
+ * PA9为USART1_TX，PA10为USART1_RX
  *****************************************************************************/
 /* Define to prevent recursive inclusion -------------------------------------*/
 #ifndef __USART_H

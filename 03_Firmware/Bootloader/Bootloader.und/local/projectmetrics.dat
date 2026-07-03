@@ -10,7 +10,7 @@
     "summaryMetric/CountDeclFile": 224,
     "summaryMetric/CountDeclFunction": 1178,
     "summaryMetric/CountLine": 173491,
-    "summaryMetric/CountLineBlank": 20475,
+    "summaryMetric/CountLineBlank": 20395,
     "summaryMetric/CountLineCode": 52004,
     "summaryMetric/CountLineComment": 66131,
     "summaryMetric/CountLineInactive": 39557,
@@ -18,5 +18,5 @@
     "summaryMetric/CountStmtDecl": 11499,
     "summaryMetric/CountStmtExe": 26623,
     "summaryMetric/RatioCommentToCode": 1.27,
-    "summaryMetrics": "Name,Value\nClasses,440\nFiles,224\nFunctions,1178\nLines,173491\nBlank Lines,20475\nCode Lines,52004\nComment Lines,66131\nInactive Lines,39557\nPreprocessor Lines,31383\nDeclarative Statements,11499\nExecutable Statements,26623\nComment to Code Ratio,1.27\n"
+    "summaryMetrics": "Name,Value\nClasses,440\nFiles,224\nFunctions,1178\nLines,173491\nBlank Lines,20395\nCode Lines,52004\nComment Lines,66131\nInactive Lines,39557\nPreprocessor Lines,31383\nDeclarative Statements,11499\nExecutable Statements,26623\nComment to Code Ratio,1.27\n"
 }

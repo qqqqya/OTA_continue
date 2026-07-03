@@ -196,7 +196,7 @@ int32_t Ymodem_Receive (uint8_t *buf1,uint8_t *buf2)
                     xQueueSend(Queue_AppDataBuffer,&pu32_size,0);//队列是指针 W25q的扇区，根据size的大小决定
                       if(packet_data == buf1)//切换buf
                     {
-                      packet_data = buf2;
+                      packet_data = buf2;//接收数据的局部变量如果是buf1 则切换到buf2
                     }
                     else
                     {
@@ -213,15 +213,16 @@ int32_t Ymodem_Receive (uint8_t *buf1,uint8_t *buf2)
                     session_done = 1;
                     break;
                   }
-                }
+                }//end of filename packet
                 /* Data packet */
                 else
-                {///这一段没懂
+                {///这一段没懂-就是跳过帧头的头信息 之后在恢复
                   packet_data += PACKET_HEADER;//跳过头信息
                   xQueueSend(Queue_AppDataBuffer,&packet_data,0);//// 将数据指针发送到队列
 									packet_data -= PACKET_HEADER;//恢复帧头地址
 									
-                  xSemaphoreTake(Semaphore_ExtFlashState,portMAX_DELAY);//这里只是为了获取防止 其他任务在运行 使用数据
+                  xSemaphoreTake(Semaphore_ExtFlashState,portMAX_DELAY);//这里只是为了获取防止 
+                                                          //其他任务{下载任务}在运行 使用数据
                   xSemaphoreGive(Semaphore_ExtFlashState);
 
                   if(packet_data == buf1)//切换buf

@@ -1,14 +1,6 @@
 #include "SWC_OTA.h"
 #include "ymodem.h"
 
-
-#include "FreeRTOS.h"
-#include "task.h"
-#include "queue.h"
-#include "semphr.h"
-#include "main.h"
-#include "cmsis_os.h"
-
 /**
  * @brief  OTA 协议接收任务
  * @param  
@@ -60,9 +52,11 @@ void ota_task_runnable(void *argument)
 {
 	uint8_t t_u8_rec_length=0;//接收数据长度
   uint8_t t_au8_AckCmd[] = {0x44,0x55,0x66};  
+  uint32_t t_u32_data_length=0;//数据长度
+  W25Q64_Init();
   while (1)
   {
-    switch(g_Ota_State){
+    switch(g_Ota_State){  //==请求下载，下载，请求升级，结束==
       case WaitReqDownload:
         /*1.阻塞式接收串口命令-------接收到的是串口命令*/
         HAL_UARTEx_ReceiveToIdle_DMA(&huart1, s_au8_OtaCmd, 4);
@@ -97,10 +91,13 @@ void ota_task_runnable(void *argument)
         }
         break;
       case OtaDownload:/** @brief OTA数据下载中 下载完成还是要等命令*/
-      if(0<Ymodem_Receive(g_au8_YmodemRec_A,g_au8_YmodemRec_B)){
+      t_u32_data_length=Ymodem_Receive(g_au8_YmodemRec_A,g_au8_YmodemRec_B);
+      if(0<t_u32_data_length){
         g_Ota_State = WaitReqUpdate;
         /*接收数据成功  发送确认命令44 55 66*/
         HAL_UART_Transmit(&huart1, t_au8_AckCmd, 3, 0xFFFF);
+        /** @brief 写入不满1sec的数据 --之前的数据已经在DownloadAppData_task_runnable中写入了*/
+        W25Q64_WriteData_End();
         /*清除一切生成的资源*/
           vTaskDelete(DownloadAppData_taskHandle);
           vQueueDelete(Queue_AppDataBuffer);
@@ -182,14 +179,16 @@ void soft_reset(void){
 	__set_FAULTMASK(1);
     NVIC_SystemReset();
 }
+extern int32_t packet_length;
 void DownloadAppData_task(void *argument){
   uint8_t * pu8_data = NULL;  //数据指针
   int32_t * pu32_size = NULL;//数据大小
-  //第一帧数据一定是数据的长度
+  // 好像这里是file name  --也包含长度，文件大小  pu32_size
   xQueueReceive(Queue_AppDataBuffer,&pu32_size,portMAX_DELAY);
   xSemaphoreGive(Semaphore_ExtFlashState);//确保没有占用信号量 释放互斥量 但好像不太用
   while(1){
-    xQueueReceive(Queue_AppDataBuffer,&pu8_data,portMAX_DELAY);//接收数据buf
+    xQueueReceive(Queue_AppDataBuffer,&pu8_data,portMAX_DELAY);//这里是pack data
+                                                              //
     xSemaphoreTake(Semaphore_ExtFlashState, 0);//
     if(pu8_data == NULL)
     {//数据为空  跳过循环
@@ -197,6 +196,8 @@ void DownloadAppData_task(void *argument){
     }
     //TODO Add
     //写入外部flash
+    //外部声明的变量packet_length
+    W25Q64_WriteData(pu8_data,(uint32_t)packet_length);//数据长度转换下
     xSemaphoreGive(Semaphore_ExtFlashState);
   }
 }

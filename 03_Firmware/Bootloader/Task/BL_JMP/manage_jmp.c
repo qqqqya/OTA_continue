@@ -29,6 +29,7 @@
 
 /* Includes ------------------------------------------------------------------*/
 #include "manage_jmp.h"
+#include "flash.h"
 
 
 typedef void (*pFunc)(void);      //pFunc 是变量名'，类型是 void (*)(void)。

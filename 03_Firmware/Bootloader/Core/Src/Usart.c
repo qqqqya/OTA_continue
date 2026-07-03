@@ -19,7 +19,9 @@
  * @version V1.0 2024-09-13
  *
  * @note 1 tab == 4 spaces!
- * 
+ * PA9为USART1_TX，PA10为USART1_RX
+ * PA9为USART1_TX，PA10为USART1_RX
+ * PA9为USART1_TX，PA10为USART1_RX
  *****************************************************************************/
 /* Includes ------------------------------------------------------------------*/
 #include "USART.h"
@@ -46,7 +48,7 @@ static void RCC_Configuration(void) {
 /**
   * @brief  串口GPIO配置初始化 USART1 USART2
   *         GPIO使用Pin_Speed_50MHz，Pull_Up_Pull_Down_None
-  * @param  Null
+  * @param  Null 
   * @retval None
   */
 static void GPIO_Configuration(void) 
