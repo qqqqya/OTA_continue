@@ -8,6 +8,8 @@
 #include "main.h"
 #include "cmsis_os.h"
 #include "w25qxx_Handler.h"
+#include "at24cxx_Driver.h"
+
 void ota_task_runnable(void *argument);
 
 #endif 

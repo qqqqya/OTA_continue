@@ -72,7 +72,7 @@ int main(void)
 {
 
   /* USER CODE BEGIN 1 */
-	SCB->VTOR = 0x08000000 | 0x8000; //设置向量表偏移地�????�????0x08000000	//0x8019000
+	SCB->VTOR = 0x08000000 | 0x8000; //设置向量表偏移地�????�????0x08000000	//0x8019000
 	__enable_irq();
   /* USER CODE END 1 */
 
@@ -98,7 +98,7 @@ int main(void)
   MX_USART1_UART_Init();
   MX_SPI1_Init();
   /* USER CODE BEGIN 2 */
-//  ee_CheckOk();
+  ee_CheckOk();//检查eeprom是否正常工作
   W25Qx_Init();
 	// printf("Hello app!\r\n");
 /* 

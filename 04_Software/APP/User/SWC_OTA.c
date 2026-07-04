@@ -54,6 +54,10 @@ void ota_task_runnable(void *argument)
   uint8_t t_au8_AckCmd[] = {0x44,0x55,0x66};  
   uint32_t t_u32_data_length=0;//数据长度
   W25Q64_Init();
+
+  uint8_t t_u8_otastate = 0x00;
+  /*清除eeprom的OTA状态--没有更新--在00地址 写入0x00*/
+  ee_WriteBytes(&t_u8_otastate,0x00,1);
   while (1)
   {
     switch(g_Ota_State){  //==请求下载，下载，请求升级，结束==
@@ -73,6 +77,11 @@ void ota_task_runnable(void *argument)
             DownloadAppData_taskHandle = osThreadNew(DownloadAppData_task, NULL, &DownloadAppData_task_attributes);
             Queue_AppDataBuffer = xQueueCreate(2, sizeof(uint8_t * ));//Ymodem协议发送==过来的数据地址==
             Semaphore_ExtFlashState = xSemaphoreCreateMutex();//外部flash---互斥量
+
+          t_u8_otastate = 0x11;//App数据下载过程中
+          //app数据下载过程中--更新eeprom的OTA状态--有更新
+          ee_WriteBytes(&t_u8_otastate,0x00,1);
+
           }
           else
           {/** @brief 重置接收的命令*/
@@ -102,6 +111,22 @@ void ota_task_runnable(void *argument)
           vTaskDelete(DownloadAppData_taskHandle);
           vQueueDelete(Queue_AppDataBuffer);
           vSemaphoreDelete(Semaphore_ExtFlashState);
+
+          t_u8_otastate = 0x22;//App请求更新App
+          //app请求更新App--更新eeprom的OTA状态--有更新
+          ee_WriteBytes(&t_u8_otastate,0x00,1);
+
+          //写入数据长度--在01地址 写入数据长度
+            ee_WriteBytes((uint8_t *)&t_u32_data_length,0x01,sizeof(t_u32_data_length));
+
+                    //Test 
+          uint8_t t_u8_readstate = 0;
+          ee_ReadBytes(&t_u8_readstate,0x00,1);
+          HAL_UART_Transmit(&huart1,&t_u8_readstate,1,1000);
+                    //Test 
+          uint8_t t_au8_readlength[4] = {0};
+          ee_ReadBytes(t_au8_readlength,0x01,4);
+          HAL_UART_Transmit(&huart1,t_au8_readlength,4,1000);
       }
       else
       {/** @brief 接收数据失败*/
@@ -126,6 +151,9 @@ void ota_task_runnable(void *argument)
             g_Ota_State = OtaEnd;
             /*创建线程以及相关队列*/
             //TODO Add
+
+            //app请求更新App 
+            ee_WriteBytes(&t_u8_otastate,0x02,1);
           }
           else
           {/** @brief 重置接收的命令*/
