@@ -17,6 +17,7 @@
 #include "Ymodem.h"
 #include "Spi.h"
 #include "w25qxx_Handler.h"
+#include "at24cxx_driver.h"
 // 全局定义 STM32F411xE 或者 STM32F401xx
 // 当前定义 STM32F411xE
 
@@ -78,6 +79,7 @@ int main(void)
 
   SPI1_Init();
   W25Q64_Init();
+  ee_CheckOk();
 	//Ymodem_Receive(au8_test);
 	//JumpToApp();
   if(Key_Scan())
@@ -135,6 +137,52 @@ int main(void)
 	}
 }
 
+/**
+  * @brief AES解密;外部flash未分区;下载到片上flash
+  * @param  None
+  * @retval None
+  */
+#if 0
+  if(Key_Scan())
+  {
+    //按下
+    /*1.下载到备份区*/
+    fil_size = Ymodem_Receive(au8_test);
+    /*2.备份区数据拷贝到A区中*/
+    if(0 == External_AES_Backup2App(fil_size))
+    {
+      Jump2App();
+    }
+    else
+    {
+      //
+    }
+  }
+  else
+  {
+    Jump2App();
+  }
+  /* Infinite loop */
+  while (1)
+  {
+    log_e("No Valid App,Please press key and download new App!");
+    if(Key_Scan())
+    {
+      //按下
+      /*1.下载到备份区*/
+      fil_size = Ymodem_Receive(au8_test);
+      /*2.备份区数据拷贝到A区中*/
+      if(0 == External_AES_Backup2App(fil_size))
+      {
+        Jump2App();
+      }
+      else
+      {
+        //
+      }
+    }
+}
+#endif
 /**
   * @brief  Inserts a delay time.
   * @param  nTime: specifies the delay time length, in milliseconds.
