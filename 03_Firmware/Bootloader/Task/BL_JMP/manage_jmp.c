@@ -30,19 +30,377 @@
 /* Includes ------------------------------------------------------------------*/
 #include "manage_jmp.h"
 #include "flash.h"
+#include "at24cxx_driver.h"
+#include "elog.h"
+#include "w25qxx_Handler.h"
+#include "ymodem.h"
 
 
 typedef void (*pFunc)(void);      //pFunc 是变量名'，类型是 void (*)(void)。
 pFunc Jump2Application;//函数指针类型--变量 
                         //完全等价与 void (*Jump2Application)(void) 
-uint32_t JumpAddress;
+
+uint32_t JumpAddress;//跳转地址
 uint16_t app_size = 0;//APP程序大小
+
+uint8_t au8_test[1024]; //测试数据缓存
 
 ///向量--密钥  1(dec) 0x31(ascii)  2(dec) 0x32(ascii)
 unsigned char IV[16]={0x31,0X32,0x31,0X32,0x31,0X32,0x31,0X32,0x31,0X32,0x31,0X32,0x31,0X32,0x31,0X32};  
 unsigned char Key[32]={0x31,0X32,0x31,0X32,0x31,0X32,0x31,0X32,0x31,0X32,0x31,0X32,0x31,0X32,0x31,0X32,\
                        0x31,0X32,0x31,0X32,0x31,0X32,0x31,0X32,0x31,0X32,0x31,0X32,0x31,0X32,0x31,0X32};
 u8  Mem_Read_buffer[4096];//读4k  外部flash读数据缓存
+
+void Ota_statemanage(void){
+  uint8_t ota_status = NO_APP_UPDATE;//OTA状态
+  int32_t fil_size = 0;//文件大小
+  uint32_t t_u32_appsize = 0;//APP程序大小
+
+  ee_ReadBytes(&ota_status,0x00,1);//读取OTA状态字节
+  switch(ota_status)
+  {
+    case NO_APP_UPDATE:
+      if(Key_Scan())//没有更新的情况下，如果按下就重新拷贝，如果没按下就直接跳转APP程序
+      {            //通常情况下，都是直接跳转APP程序
+        //按下
+        /*1.将接收到的数据 拷贝到exflash A区*/
+        fil_size = Ymodem_Receive(au8_test);
+        /*2.解密数据到exflash B区*/
+        if(0 == ExA_To_ExB_AES(fil_size))
+        {
+        /*3.拷贝当前的APP程序 到exflash A区--为了回滚使用*/
+          ee_ReadBytes((uint8_t *)&t_u32_appsize,0x05,4);//app程序大小
+          App_To_ExA(t_u32_appsize);
+        /*4.exflash B区的解密后数据加载到片上flash*/
+          ExB_To_App();
+        /*5.跳转APP程序*/
+          Jump2App();
+
+    //这里其实就是如果跳转不成功，就将上一次备份的能运行的程序再一次的拷贝回片上flash中
+          // /*6.如果运行到这一步，说明数据无效，把外部A区的数据搬运到App中*/
+          ExA_To_App();
+          /*再执行一次跳转*/
+          Jump2App();
+        }
+        else
+        {
+          //解密不成功，直接跳转APP程序，不进行其他操作
+          log_e("Download Failed!");
+          Jump2App();
+        }
+      }
+      else
+      {
+        Jump2App();
+      }
+      break;
+    case APP_DOWNLOADING://0x11 下载错误
+      log_a("App dowload failed");
+      Jump2App();//如果下载不成功的话，就会卡在11这个状态码上
+
+      //跳转失败，下载新App
+      break;
+    case APP_DOWNLOAD_COMPLETE://0x22  更新完成读取文件大小
+      // 读取当前需要更新的App的大小--4字节大小；从01地址开始读
+      ee_ReadBytes((uint8_t *)&t_u32_appsize,0x01,4);
+      // app_size = t_u32_appsize;
+      break;
+    default:
+
+      /*NO action*/
+      break;
+  }
+}
+/**
+ * @brief 解密数据到B区---将外部flash A区的数据搬运到外部flash B区并进行AES解密
+ * 
+ * @param fl_size 
+ * @return int8_t 
+ */
+int8_t ExA_To_ExB_AES(int32_t fl_size){
+    u8 Temp[16];  //原密文数据缓存
+    u16 readTime=0,readDataCount=0;   //读取数据再解密的次数（每次解密16个字节）
+    u32 AppSize=0;  //升级包的大小
+    //u32 FlashDestination=ApplicationAddress;
+    u16 Read_Memory_Size=0;
+    u32 Read_Memory_index=0;
+    uint8_t *pu8_IV_IN_OUT = IV;
+    uint8_t *pu8_key256bit = Key;
+
+    if(fl_size <= 0)
+    {
+      return -1;
+    }
+    if ((app_size > (0x18010 - 1)) ||\
+    (app_size < 0))//这里的96kb表示  划分的APP运行区就是96 KB
+    {//appsize 在ymodemn.c中已经解析出来了
+      return -1;
+    }
+    //先读一帧，用来解析头文件格式
+    W25Q64_ReadData(BLOCK_1,Mem_Read_buffer,&Read_Memory_Size);
+    if(Read_Memory_Size  >= 16)
+    {
+      memcpy(Temp,Mem_Read_buffer,16);
+      Aes_IV_key256bit_Decode(pu8_IV_IN_OUT,Temp,pu8_key256bit);
+      // 通过向量-密文-密钥-解密得到明文
+      // 这里的密文，是一帧一帧解密的，像这里就是16个字节
+      // 先解析密文大小,得出要解析的次数，后面的密文解析是一帧一帧的去
+      AppSize=(Temp[15]<<24)+(Temp[14]<<16)+(Temp[13]<<8)+Temp[12];
+      log_d("AppSize=%d",AppSize);
+      
+      //计算升级包读取次数
+      readDataCount=AppSize/16;
+      if(AppSize%16!=0)
+      {
+        readDataCount+=1;
+      }
+      Read_Memory_index += 16;
+    }
+
+    //数据帧
+    //擦除外部flash比较耗时--这里先不擦出、对于A区在擦除
+        // uint8_t flash_erase_state = Flash_erase(AppRunFlashDestination,AppSize);
+
+      for(readTime=0;readTime<readDataCount;readTime++)
+      {
+        //判断下当前buffer下的数据是否读取完毕
+        if(Read_Memory_index == Read_Memory_Size)
+        {
+          if(2 == W25Q64_ReadData(BLOCK_1,Mem_Read_buffer,&Read_Memory_Size))
+          {//2:读取失败  0:读取成功  1:读取成功
+            return -1;
+          }
+          Read_Memory_index = 0;
+        }
+        //拷贝16个数据
+        memcpy(Temp,Mem_Read_buffer + Read_Memory_index,16);
+        Read_Memory_index += 16;
+        //解析16个数据
+        Aes_IV_key256bit_Decode(pu8_IV_IN_OUT,Temp,pu8_key256bit);//解析
+
+        //写入到外部flash B区
+        W25Q64_WriteData(BLOCK_2,Temp,16);
+        // for (wirteTime = 0;wirteTime<4;wirteTime++)
+        // {
+        //   Flash_Write(AppRunFlashDestination, *(uint32_t*)RamSource);
+        //   AppRunFlashDestination += 4;
+        //   RamSource += 4;
+        // }
+      }
+    W25Q64_WriteData_End(BLOCK_2);
+    log_d("Write_Flash_After_AES_Decode end");
+    return 0;
+}
+/**
+ * @brief 将当前的APP程序 到exflash A区--为了回滚使用
+ * 
+ * @param fl_size 
+ */
+int8_t App_To_ExA(int32_t fl_size){
+  u8 flash_des=ApplicationAddress;
+
+    if(fl_size <= 0)
+  {
+    return -1;
+  }
+  if ((app_size > (0x18010 - 1)) ||\
+  (app_size < 0))//这里的96kb表示  划分的APP运行区就是96 KB
+  {//appsize 在ymodemn.c中已经解析出来了
+    return -1;
+  }
+  Erase_Flash_Block(BLOCK_1);//擦除A区
+  W25Q64_WriteData(BLOCK_1,(u8 *)flash_des,fl_size);//将当前的APP程序搬运到外部flash A区
+  W25Q64_WriteData_End(BLOCK_1);
+  
+  return 0;
+}
+/**
+ * @brief 将解密过后的外部flash B区的数据搬运到片上flash中
+ * 
+ * @return int8_t 
+ */
+int8_t ExB_To_App(void)
+{
+  u32 FlashDes = ApplicationAddress;
+  u32 flashsize = 0;
+  u8  Read_dataState = 0;
+  u16 Read_Memorysize = 0;
+  u32 RamSource = 0;
+  u16 writeTime=0;
+  /*擦除本地flash数据*/
+  flashsize = Read_BlockSize(BLOCK_2);
+  if(1 == Flash_erase(FlashDes,flashsize))
+  {
+    return -1;
+  }
+  else
+  {
+    for(;;)
+    {
+      Read_dataState = W25Q64_ReadData(BLOCK_2,Mem_Read_buffer,&Read_Memorysize);
+      if(1 == Read_dataState)
+      {
+        //数据读完退出
+        break;
+      }
+      else if(2 == Read_dataState)
+      {
+        //外部flash数据读取有问题
+        break;
+      }
+      else
+      {
+        RamSource = (u32)Mem_Read_buffer;
+        //循环搬运flash数据
+        for(writeTime = 0; writeTime < (Read_Memorysize/4);writeTime++)
+        {
+          //Flash_Write(FlashDes,RamSource);//Old
+          Flash_Write(FlashDes,*(u32 *)RamSource);
+          FlashDes += 4;
+          RamSource += 4;
+        }
+      }
+    }
+    return flashsize;
+  }
+}
+
+// int8_t ExB_To_App(void){
+
+//   u8 flash_des=ApplicationAddress;
+//   u32 RamSource = 0;
+//   uint16_t write_time=0;
+//   u16 Read_Memory_Size=0;
+//   u32 Read_Memory_index=0;
+
+//   u32 flash_size = 0;
+//   u32 read_datastate = 0;
+//   /*1.读取外部flash B区的大小 擦除片上flash的对应区域*/
+//   flash_size = Read_BlockSize(BLOCK_2);
+//   if( 0== Flash_erase(flash_des,flash_size)){
+//     //擦除成功
+//     for(;;){
+//       /*2.读取外部flash B区数据 到Mem_Read_buffer临时buf*/
+//       read_datastate = W25Q64_ReadData(BLOCK_2,Mem_Read_buffer,&Read_Memory_Size);
+//       if(read_datastate == 1){//读取完毕 退出循环
+//         break;
+//       }
+//       else if(read_datastate == 2){//读取失败 退出循环
+//         break;
+//       }
+//       /*3.写数据 将数据从Mem_Read_buffer临时buf搬运到片上flash中*/
+//       else{//读取成功--将数据搬运到片上flash
+//         RamSource = (uint32_t)Mem_Read_buffer;
+//         for(write_time = 0; write_time < (Read_Memory_Size/4);write_time++)
+//         {/*3.1.四字节的搬运到片上flash*/
+//           Flash_Write(flash_des,RamSource);
+//           flash_des += 4;
+//           RamSource += 4;
+//         }
+        
+//       }
+//     }
+//     return flash_size;//返回搬运的大小
+//   }else{
+//     //擦除失败
+//     return -1;
+//   }
+
+//   return 0;
+// }
+/**
+ * @brief 就是将上一次备份的能运行的程序再一次的拷贝回片上flash中
+ * 将外部flash A区的数据搬运到片上flash中
+ * 
+ * @param fl_size 
+ */
+int8_t ExA_To_App(void)
+{
+  u32 FlashDes = ApplicationAddress;
+  u32 flashsize = 0;
+  u8  Read_dataState = 0;
+  u16 Read_Memorysize = 0;
+  u32 RamSource = 0;
+  u16 writeTime=0;
+  /*擦除本地flash数据*/
+  flashsize = Read_BlockSize(BLOCK_1);
+  if(1 == Flash_erase(FlashDes,flashsize))
+  {
+    return -1;
+  }
+  else
+  {
+    for(;;)
+    {
+      Read_dataState = W25Q64_ReadData(BLOCK_1,Mem_Read_buffer,&Read_Memorysize);
+      if(1 == Read_dataState)
+      {
+        //数据读完退出
+        break;
+      }
+      else if(2 == Read_dataState)
+      {
+        //外部flash数据读取有问题
+        break;
+      }
+      else
+      {
+        RamSource = (u32)Mem_Read_buffer;
+        //循环搬运flash数据
+        for(writeTime = 0; writeTime < (Read_Memorysize/4);writeTime++)
+        {
+          Flash_Write(FlashDes,RamSource);
+          FlashDes += 4;
+          RamSource += 4;
+        }
+      }
+    }
+    return flashsize;
+  }
+}
+
+#if 0
+int8_t ExA_To_App(void){
+  u8 flash_des=ApplicationAddress;
+  u32 RamSource = 0;
+  uint16_t write_time=0;   //写入数据次数
+
+  u16 Read_Memory_Size=0;
+  u32 Read_Memory_index=0;
+
+  u32 flash_size = 0;
+  u32 read_datastate = 0;
+  flash_size = Read_BlockSize(BLOCK_1);//读取A区的大小
+  if( 0== Flash_erase(flash_des,flash_size)){
+
+    for(;;){
+      //读取外部flash A区数据
+      read_datastate = W25Q64_ReadData(BLOCK_1,Mem_Read_buffer,&Read_Memory_Size);
+      if(read_datastate == 1){//读取完毕 退出循环
+        break;
+      }
+      else if(read_datastate == 2){//读取失败 退出循环
+        break;
+      }
+      else{//读取成功--将数据搬运到片上flash
+        RamSource = (uint32_t)Mem_Read_buffer;
+        for(write_time = 0; write_time < (Read_Memory_Size/4);write_time++)
+        {//四字节的搬运
+          Flash_Write(flash_des,RamSource);
+          flash_des += 4;
+          RamSource += 4;
+        }
+      }
+    }
+    return flash_size;//返回搬运的大小
+  }
+  else{
+    //擦除失败
+    return -1;
+  }
+}
+  
+
 int8_t External_AES_Backup2App(int32_t fl_size){
     u8 Temp[16];  //原密文数据缓存
     u8 wirteTime=0;  //一个解析包写入次数
@@ -53,6 +411,8 @@ int8_t External_AES_Backup2App(int32_t fl_size){
     u32 Read_Memory_index=0;
     uint8_t *pu8_IV_IN_OUT = IV;
     uint8_t *pu8_key256bit = Key;
+
+    
     uint32_t RamSource = 0;
     uint32_t AppRunFlashDestination = ApplicationAddress;
     if(fl_size <= 0)
@@ -69,7 +429,10 @@ int8_t External_AES_Backup2App(int32_t fl_size){
     if(Read_Memory_Size  >= 16)
     {
       memcpy(Temp,Mem_Read_buffer,16);
-      Aes_IV_key256bit_Decode(pu8_IV_IN_OUT,Temp,pu8_key256bit);//解析得到自定义内容+文件大小
+      Aes_IV_key256bit_Decode(pu8_IV_IN_OUT,Temp,pu8_key256bit);
+      // 通过向量-密文-密钥-解密得到明文
+      // 这里的密文，是一帧一帧解密的，像这里就是16个字节
+      // 先解析密文大小,得出要解析的次数，后面的密文解析是一帧一帧的去
       AppSize=(Temp[15]<<24)+(Temp[14]<<16)+(Temp[13]<<8)+Temp[12];
 //      log_d("AppSize=%d",AppSize);
       
@@ -93,7 +456,7 @@ int8_t External_AES_Backup2App(int32_t fl_size){
         if(Read_Memory_index == Read_Memory_Size)
         {
           if(2 == W25Q64_ReadData(Mem_Read_buffer,&Read_Memory_Size))
-          {
+          {//2:读取失败  0:读取成功  1:读取成功
             return -1;
           }
           Read_Memory_index = 0;
@@ -118,6 +481,7 @@ int8_t External_AES_Backup2App(int32_t fl_size){
     {
       return -1;
     }
+#endif
 
 #if 0
 
@@ -206,7 +570,6 @@ int8_t External_AES_Backup2App(int32_t fl_size){
   }
   return 0;
 #endif
-}
 
 int8_t AES_Backup2App(int32_t fl_size){
     uint32_t FlashDestination = ApplicationAddress;//APP地址        08008000
@@ -263,31 +626,32 @@ int8_t AES_Backup2App(int32_t fl_size){
   }
     return 0;
 }
-void Jump2App(void){
-    /* 检查栈顶地址是否合法 */
-    if(((*(__IO uint32_t *)ApplicationAddress) & 0x2FFE0000) == 0x20000000)
-    {
 
-        /* 屏蔽所有中断，防止在跳转过程中，中断干扰出现异常 */
-        __disable_irq();
-        NVIC_SetVectorTable(FALSH_BASE_ADDR, 0x8000);
-        RCC_DeInit();
-        /* 用户代码区第二个 字 为程序开始地址(复位地址) */
-        JumpAddress = *(__IO uint32_t *) (ApplicationAddress + 4);
-
-        /* Initialize user application's Stack Pointer */
-        /* 初始化APP堆栈指针(用户代码区的第一个字用于存放栈顶地址) */
-        __set_MSP(*(__IO uint32_t *) ApplicationAddress);///将8000的MSP重新设置
-
-        /* 类型转换 */
-        Jump2Application = (pFunc) JumpAddress;
-/*这句话在汇编层面其实就是把0x080081AD 塞进了 PC(程序计数器)
-PC指针瞬间来到了 0x080081AC，这里存放的是APP工程里的
-Reset_Handler 汇编代码。*/
-        /* 跳转到 APP */
-        Jump2Application();
-    }
-  }
+ void Jump2App(void){
+     /* 检查栈顶地址是否合法 */
+     if(((*(__IO uint32_t *)ApplicationAddress) & 0x2FFE0000) == 0x20000000)
+     {
+// 		printf("jump addr start\r\n");  
+         /* 屏蔽所有中断，防止在跳转过程中，中断干扰出现异常 */
+         __disable_irq();
+         NVIC_SetVectorTable(FALSH_BASE_ADDR, 0x8000);
+         RCC_DeInit();
+         /* 用户代码区第二个 字 为程序开始地址(复位地址) */
+         JumpAddress = *(__IO uint32_t *) (ApplicationAddress + 4);
+// 		printf("jump addr :0x%08X\r\n",JumpAddress);
+         /* Initialize user application's Stack Pointer */
+         /* 初始化APP堆栈指针(用户代码区的第一个字用于存放栈顶地址) */
+         __set_MSP(*(__IO uint32_t *) ApplicationAddress);///将8000的MSP重新设置
+		
+         /* 类型转换 */
+         Jump2Application = (pFunc) JumpAddress;
+ /*这句话在汇编层面其实就是把0x080081AD 塞进了 PC(程序计数器)
+ PC指针瞬间来到了 0x080081AC，这里存放的是APP工程里的
+ Reset_Handler 汇编代码。*/
+         /* 跳转到 APP */
+         Jump2Application();
+     }
+   }
 
 /**将back写入app地址
  * 先提取back 再将back写入app地址--erase app地址--write back到app地址

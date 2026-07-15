@@ -78,6 +78,7 @@ void ota_task_runnable(void *argument)
             Queue_AppDataBuffer = xQueueCreate(2, sizeof(uint8_t * ));//Ymodem协议发送==过来的数据地址==
             Semaphore_ExtFlashState = xSemaphoreCreateMutex();//外部flash---互斥量
 
+            //已经接收到112233的指令，开始进入下载，后续和主机握手
           t_u8_otastate = 0x11;//App数据下载过程中
           //app数据下载过程中--更新eeprom的OTA状态--有更新
           ee_WriteBytes(&t_u8_otastate,0x00,1);
@@ -111,7 +112,8 @@ void ota_task_runnable(void *argument)
           vTaskDelete(DownloadAppData_taskHandle);
           vQueueDelete(Queue_AppDataBuffer);
           vSemaphoreDelete(Semaphore_ExtFlashState);
-
+          //从协议中接收完成；已经将传输的数据写在临时的RAM中；重启，等待PC发送指令进行更新，也就是请求更新；
+          //从这之后，从机也可以将传输过来的数据大小、数据长度写入eeprom的01地址
           t_u8_otastate = 0x22;//App请求更新App
           //app请求更新App--更新eeprom的OTA状态--有更新
           ee_WriteBytes(&t_u8_otastate,0x00,1);
@@ -149,11 +151,6 @@ void ota_task_runnable(void *argument)
           {
             /*切换状态---到结束状态*/
             g_Ota_State = OtaEnd;
-            /*创建线程以及相关队列*/
-            //TODO Add
-
-            //app请求更新App 
-            ee_WriteBytes(&t_u8_otastate,0x02,1);
           }
           else
           {/** @brief 重置接收的命令*/

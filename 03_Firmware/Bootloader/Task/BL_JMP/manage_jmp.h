@@ -9,8 +9,19 @@
 // #define FALSH_BASE_ADDR 0x08000000//+ 0x00019000
 #define ApplicationAddress 0x08008000 //APP程序的启动地址-MSP
 #define BackupApplicationAddress 0x08020000 //备份APP程序启动地址
+
+#define NO_APP_UPDATE               0x00
+#define APP_DOWNLOADING             0x11
+#define APP_DOWNLOAD_COMPLETE       0x22
+
 void Jump2App(void);
 int8_t Backup2App(void);
 int8_t AES_Backup2App(int32_t fl_size);
 int8_t External_AES_Backup2App(int32_t fl_size);
+
+void Ota_statemanage(void);
+int8_t ExA_To_ExB_AES(int32_t fl_size);
+int8_t ExB_To_App(void);
+int8_t ExA_To_App(void);
+int8_t App_To_ExA(int32_t fl_size);
 #endif 

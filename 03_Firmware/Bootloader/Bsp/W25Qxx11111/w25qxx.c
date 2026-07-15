@@ -97,11 +97,11 @@ uint8_t W25Qx_WriteEnable(void)
 /**
   * @brief  Read Manufacture/Device ID.
 	* @param  return value address
-/   返回值如下:        
-/   0XEF13,表示芯片型号为W25Q80   
-/   0XEF14,表示芯片型号为W25Q16     
-/   0XEF15,表示芯片型号为W25Q32   
-/   0XEF16,表示芯片型号为W25Q64  
+/   锟斤拷锟斤拷值锟斤拷锟斤拷:        
+/   0XEF13,锟斤拷示芯片锟酵猴拷为W25Q80   
+/   0XEF14,锟斤拷示芯片锟酵猴拷为W25Q16     
+/   0XEF15,锟斤拷示芯片锟酵猴拷为W25Q32   
+/   0XEF16,锟斤拷示芯片锟酵猴拷为W25Q64  
   * @retval None
   */
 void W25Qx_Read_ID(uint16_t *ID)
