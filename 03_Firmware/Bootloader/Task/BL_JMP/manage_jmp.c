@@ -59,10 +59,9 @@ void Ota_statemanage(void){
   ee_ReadBytes(&ota_status,0x00,1);//读取OTA状态字节
   switch(ota_status)
   {
-    case NO_APP_UPDATE:
-      if(Key_Scan())//没有更新的情况下，如果按下就重新拷贝，如果没按下就直接跳转APP程序
-      {            //通常情况下，都是直接跳转APP程序
-        //按下
+    case NO_APP_UPDATE://没有更新的情况下，如果按下就重新拷贝，如果没按下就直接跳转APP程序
+      if(Key_Scan())//通常情况下，都是直接跳转APP程序
+      {   //按下         
         /*1.将接收到的数据 拷贝到exflash A区*/
         fil_size = Ymodem_Receive(au8_test);
         /*2.解密数据到exflash B区*/
@@ -70,12 +69,11 @@ void Ota_statemanage(void){
         {
         /*3.拷贝当前的APP程序 到exflash A区--为了回滚使用*/
           ee_ReadBytes((uint8_t *)&t_u32_appsize,0x05,4);//app程序大小
-          App_To_ExA(t_u32_appsize);
+          App_To_ExA(t_u32_appsize);//0X05存的是当前APP字节大小
         /*4.exflash B区的解密后数据加载到片上flash*/
           ExB_To_App();
         /*5.跳转APP程序*/
           Jump2App();
-
     //这里其实就是如果跳转不成功，就将上一次备份的能运行的程序再一次的拷贝回片上flash中
           // /*6.如果运行到这一步，说明数据无效，把外部A区的数据搬运到App中*/
           ExA_To_App();
@@ -91,19 +89,28 @@ void Ota_statemanage(void){
       }
       else
       {
-        Jump2App();
+        Jump2App();//KEY_Scan() 没有按下，直接跳转APP程序
       }
       break;
-    case APP_DOWNLOADING://0x11 下载错误
-      log_a("App dowload failed");
-      Jump2App();//如果下载不成功的话，就会卡在11这个状态码上
+    case APP_DOWNLOADING://0x11--EEPROM--说明，只是进行了协议握手，但是没有传输成功文件
+      log_a("App dowload failed");//1、如果下载不成功的话，就会卡在11这个状态码上
+      Jump2App();
+      log_a("NO VALID APP!!");//2、ApP地址上没有固件，要重新下载固件
+
+      //3、接收数据，然后后面进行跳转
 
       //跳转失败，下载新App
       break;
-    case APP_DOWNLOAD_COMPLETE://0x22  更新完成读取文件大小
+    case APP_DOWNLOAD_COMPLETE://0x22--说明，更新完成，把上个版本的估计被分到ex flash, 方便回滚
       // 读取当前需要更新的App的大小--4字节大小；从01地址开始读
+        //0X 01存的是新APP的字体大小，0X05存的是当前APP字节大小
       ee_ReadBytes((uint8_t *)&t_u32_appsize,0x01,4);
-      // app_size = t_u32_appsize;
+      //2.App大小更新到内部flash存储数据量的管理结构体中
+
+      /*2.解密数据到exflash B区*/ //因为之前的数据已经从APP的过程中接收成功
+
+      /*3.将解密后的数据加载到片上flash*/
+      
       break;
     default:
 
@@ -219,95 +226,50 @@ int8_t App_To_ExA(int32_t fl_size){
  * 
  * @return int8_t 
  */
-int8_t ExB_To_App(void)
-{
-  u32 FlashDes = ApplicationAddress;
-  u32 flashsize = 0;
-  u8  Read_dataState = 0;
-  u16 Read_Memorysize = 0;
+/*wrong version*/
+int8_t ExB_To_App(void){
+
+  u32 flash_des=ApplicationAddress;
+  // u8 flash_des=ApplicationAddress;
   u32 RamSource = 0;
-  u16 writeTime=0;
-  /*擦除本地flash数据*/
-  flashsize = Read_BlockSize(BLOCK_2);
-  if(1 == Flash_erase(FlashDes,flashsize))
-  {
-    return -1;
-  }
-  else
-  {
-    for(;;)
-    {
-      Read_dataState = W25Q64_ReadData(BLOCK_2,Mem_Read_buffer,&Read_Memorysize);
-      if(1 == Read_dataState)
-      {
-        //数据读完退出
+  uint16_t write_time=0;
+  u16 Read_Memory_Size=0;
+  u32 Read_Memory_index=0;
+
+  u32 flash_size = 0;
+  u32 read_datastate = 0;
+  /*1.读取外部flash B区的大小 擦除片上flash的对应区域*/
+  flash_size = Read_BlockSize(BLOCK_2);
+  if( 0== Flash_erase(flash_des,flash_size)){
+    //擦除成功
+    for(;;){
+      /*2.读取外部flash B区数据 到Mem_Read_buffer临时buf*/
+      read_datastate = W25Q64_ReadData(BLOCK_2,Mem_Read_buffer,&Read_Memory_Size);
+      if(read_datastate == 1){//读取完毕 退出循环
         break;
       }
-      else if(2 == Read_dataState)
-      {
-        //外部flash数据读取有问题
+      else if(read_datastate == 2){//读取失败 退出循环
         break;
       }
-      else
-      {
-        RamSource = (u32)Mem_Read_buffer;
-        //循环搬运flash数据
-        for(writeTime = 0; writeTime < (Read_Memorysize/4);writeTime++)
-        {
-          //Flash_Write(FlashDes,RamSource);//Old
-          Flash_Write(FlashDes,*(u32 *)RamSource);
-          FlashDes += 4;
+      /*3.写数据 将数据从Mem_Read_buffer临时buf搬运到片上flash中*/
+      else{//读取成功--将数据搬运到片上flash
+        RamSource = (uint32_t)Mem_Read_buffer;
+        for(write_time = 0; write_time < (Read_Memory_Size/4);write_time++)
+        {/*3.1.四字节的搬运到片上flash*/
+          // Flash_Write(flash_des,RamSource);
+          Flash_Write(flash_des,*(uint32_t *)RamSource);
+          flash_des += 4;
           RamSource += 4;
-        }
+        }    
       }
     }
-    return flashsize;
+    return flash_size;//返回搬运的大小
+  }else{
+    //擦除失败
+    return -1;
   }
+  return 0;
 }
-
-// int8_t ExB_To_App(void){
-
-//   u8 flash_des=ApplicationAddress;
-//   u32 RamSource = 0;
-//   uint16_t write_time=0;
-//   u16 Read_Memory_Size=0;
-//   u32 Read_Memory_index=0;
-
-//   u32 flash_size = 0;
-//   u32 read_datastate = 0;
-//   /*1.读取外部flash B区的大小 擦除片上flash的对应区域*/
-//   flash_size = Read_BlockSize(BLOCK_2);
-//   if( 0== Flash_erase(flash_des,flash_size)){
-//     //擦除成功
-//     for(;;){
-//       /*2.读取外部flash B区数据 到Mem_Read_buffer临时buf*/
-//       read_datastate = W25Q64_ReadData(BLOCK_2,Mem_Read_buffer,&Read_Memory_Size);
-//       if(read_datastate == 1){//读取完毕 退出循环
-//         break;
-//       }
-//       else if(read_datastate == 2){//读取失败 退出循环
-//         break;
-//       }
-//       /*3.写数据 将数据从Mem_Read_buffer临时buf搬运到片上flash中*/
-//       else{//读取成功--将数据搬运到片上flash
-//         RamSource = (uint32_t)Mem_Read_buffer;
-//         for(write_time = 0; write_time < (Read_Memory_Size/4);write_time++)
-//         {/*3.1.四字节的搬运到片上flash*/
-//           Flash_Write(flash_des,RamSource);
-//           flash_des += 4;
-//           RamSource += 4;
-//         }
-        
-//       }
-//     }
-//     return flash_size;//返回搬运的大小
-//   }else{
-//     //擦除失败
-//     return -1;
-//   }
-
-//   return 0;
-// }
 /**
  * @brief 就是将上一次备份的能运行的程序再一次的拷贝回片上flash中
  * 将外部flash A区的数据搬运到片上flash中

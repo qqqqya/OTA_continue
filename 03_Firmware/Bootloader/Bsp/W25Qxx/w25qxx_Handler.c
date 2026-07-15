@@ -8,7 +8,7 @@
  * @par dependencies 
  * - W25Q_Handler.h
  * 
- * @author Jack | R&D Dept. | EternalChip Á¢Ğ¾Ç¶ÈëÊ½
+ * @author Jack | R&D Dept. | EternalChip ç«‹èŠ¯åµŒå…¥å¼
  * 
  * @brief Functions related to reading and writing in the chip's flash area.
  * 
@@ -28,122 +28,116 @@
 /* Private define ------------------------------------------------------------*/
 /* Private macro -------------------------------------------------------------*/
 /* Private variables ---------------------------------------------------------*/
-static st_W25Q_Handler s_ast_W25Q_Handler[2];
+static st_W25Q_Handler s_st_W25Q_Handler_1[2];
 /* Private function prototypes -----------------------------------------------*/
 /* Private functions ---------------------------------------------------------*/
 /* extern variables ---------------------------------------------------------*/
 
-void SetBlockParmeter(u8 block_index,uint32_t app_size)
-{
-    s_ast_W25Q_Handler[block_index].write_index = app_size;
-    s_ast_W25Q_Handler[block_index].write_databuf_index = app_size % BLOCK_SIZE;
-    s_ast_W25Q_Handler[block_index].write_sector_index = app_size / BLOCK_SIZE;
-}
-
+/**
+ * @brief è¯»å–æŒ‡å®šblockçš„å¤§å°
+ * 
+ * @param block_index blockçš„ç´¢å¼•ï¼Œ0æˆ–1
+ * @return uint32_t blockçš„å¤§å°
+ */
 uint32_t Read_BlockSize(u8 block_index)
 {
-    return s_ast_W25Q_Handler[block_index].write_index;
+    return s_st_W25Q_Handler_1[block_index].write_index;
 }
-
-/**
- * @brief w25q³õÊ¼»¯
+/* 
+ * @brief åˆå§‹åŒ–W25Q64 åˆå§‹åŒ–ä¸¤ä¸ªåŒºåŸŸï¼ŒAåŒº block0,BåŒº block1
  * 
- * @param None
- * 
- * @return: None
+ * @return void 
  */
 void W25Q64_Init(void)
 {
     W25Qx_Init();
-    s_ast_W25Q_Handler[0].read_index = 0;
-    s_ast_W25Q_Handler[0].read_sector_index = 0;
-    s_ast_W25Q_Handler[0].write_databuf_index = 0;
-    s_ast_W25Q_Handler[0].write_index = 0;
-    s_ast_W25Q_Handler[0].write_sector_index = 0;
+    s_st_W25Q_Handler_1[0].read_index = 0;
+    s_st_W25Q_Handler_1[0].read_sector_index = 0;
+    s_st_W25Q_Handler_1[0].write_databuf_index = 0;
+    s_st_W25Q_Handler_1[0].write_index = 0;
+    s_st_W25Q_Handler_1[0].write_sector_index = 0;
 
-    s_ast_W25Q_Handler[1].read_index = 0;
-    s_ast_W25Q_Handler[1].read_sector_index = 0;
-    s_ast_W25Q_Handler[1].write_databuf_index = 0;
-    s_ast_W25Q_Handler[1].write_index = 0;
-    s_ast_W25Q_Handler[1].write_sector_index = 0;
+    s_st_W25Q_Handler_1[1].read_index = 0;
+    s_st_W25Q_Handler_1[1].read_sector_index = 0;
+    s_st_W25Q_Handler_1[1].write_databuf_index = 0;
+    s_st_W25Q_Handler_1[1].write_index = 0;
+    s_st_W25Q_Handler_1[1].write_sector_index = 0;
+
 }
-
-void Erase_Flash_Block(u8 block_index)
-{
-	s_ast_W25Q_Handler[block_index].read_index = 0;
-	s_ast_W25Q_Handler[block_index].read_sector_index = 0;
-	s_ast_W25Q_Handler[block_index].write_databuf_index = 0;
-	s_ast_W25Q_Handler[block_index].write_index = 0;
-	s_ast_W25Q_Handler[block_index].write_sector_index = 0;
-}
-
-/**
- * @brief w25qĞ¾Æ¬²Á³ı
+/* 
+ * @brief æ“¦é™¤èŠ¯ç‰‡çš„æ‰€æœ‰sector
  * 
- * @param None
- * 
- * @return: None
+ * @return u8 0:æˆåŠŸ 1:å¤±è´¥
  */
 u8 W25Q64_EraseChip(void)
 {
     if(0 == W25Qx_Erase_Chip())
     {
-        s_ast_W25Q_Handler[0].read_index = 0;
-        s_ast_W25Q_Handler[0].read_sector_index = 0;
-        s_ast_W25Q_Handler[0].write_databuf_index = 0;
-        s_ast_W25Q_Handler[0].write_index = 0;
-        s_ast_W25Q_Handler[0].write_sector_index = 0;
-    
-        s_ast_W25Q_Handler[1].read_index = 0;
-        s_ast_W25Q_Handler[1].read_sector_index = 0;
-        s_ast_W25Q_Handler[1].write_databuf_index = 0;
-        s_ast_W25Q_Handler[1].write_index = 0;
-        s_ast_W25Q_Handler[1].write_sector_index = 0;
+    s_st_W25Q_Handler_1[0].read_index = 0;
+    s_st_W25Q_Handler_1[0].read_sector_index = 0;
+    s_st_W25Q_Handler_1[0].write_databuf_index = 0;
+    s_st_W25Q_Handler_1[0].write_index = 0;
+    s_st_W25Q_Handler_1[0].write_sector_index = 0;
+
+    s_st_W25Q_Handler_1[1].read_index = 0;
+    s_st_W25Q_Handler_1[1].read_sector_index = 0;
+    s_st_W25Q_Handler_1[1].write_databuf_index = 0;
+    s_st_W25Q_Handler_1[1].write_index = 0;
+    s_st_W25Q_Handler_1[1].write_sector_index = 0;
         return 0;
     }
     return 1;
 }
-
-/**
- * @brief w25qĞ¾Æ¬²Á³ı
+/* 
+ * @brief æ“¦é™¤æŒ‡å®šblockçš„sector
  * 
- * @param None
- * 
- * @return: None
+ * @param block_index blockçš„ç´¢å¼•ï¼Œ0æˆ–1
+ * @return u8 0:æˆåŠŸ 1:å¤±è´¥
  */
+u8 Erase_Flash_Block(u8 block_index){
+
+    s_st_W25Q_Handler_1[block_index].read_index = 0;
+    s_st_W25Q_Handler_1[block_index].read_sector_index = 0;
+    s_st_W25Q_Handler_1[block_index].write_databuf_index = 0;
+    s_st_W25Q_Handler_1[block_index].write_index = 0;
+    s_st_W25Q_Handler_1[block_index].write_sector_index = 0;
+    return 0;
+}
+
 u8 W25Q64_WriteData(u8 block_index, u8 *data, u32 length)
 {
+    u8 ret = 0;
     u32 addr = 0;
     u16 index = 0;
     for(u16 i = 0; i < length; i++)
     {
-        //1.Êı¾İĞ´ÈëÊı¾İ»º³åÇøÀïÃæ
-        index = s_ast_W25Q_Handler[block_index].write_databuf_index;
-        s_ast_W25Q_Handler[block_index].databuf[index] = *(data + i);
-        s_ast_W25Q_Handler[block_index].write_databuf_index++;
-        //2.ÅĞ¶ÏÊı¾İÓĞÃ»ÓĞĞ´Âú4096
-        if(s_ast_W25Q_Handler[block_index].write_databuf_index == W25Qx_Para.SUBSECTOR_SIZE)
+        //1.æ•°æ®å†™å…¥æ•°æ®ç¼“å†²åŒºé‡Œé¢
+        index = s_st_W25Q_Handler_1[block_index].write_databuf_index;
+        s_st_W25Q_Handler_1[block_index].databuf[index] = *(data + i);
+        s_st_W25Q_Handler_1[block_index].write_databuf_index++;
+        //2.åˆ¤æ–­æ•°æ®æœ‰æ²¡æœ‰å†™æ»¡4096
+        if(s_st_W25Q_Handler_1[block_index].write_databuf_index == W25Qx_Para.SUBSECTOR_SIZE)
         {
-            s_ast_W25Q_Handler[block_index].write_databuf_index = 0;
-            //²Á³ı1¸ösector
-            addr = W25Qx_Para.SUBSECTOR_SIZE * s_ast_W25Q_Handler[block_index].write_sector_index;
-            addr += block_index * BLOCK_SIZE;
+            s_st_W25Q_Handler_1[block_index].write_databuf_index = 0;
+            //æ“¦é™¤1ä¸ªsector
+            addr = W25Qx_Para.SUBSECTOR_SIZE * s_st_W25Q_Handler_1[block_index].write_sector_index;
+            addr += block_index * BLOCK_SIZE;////////è®¡ç®—blockçš„åç§»åœ°å€
             W25Qx_Erase_Block(addr);
             W25Qx_WriteEnable();
-            //Ğ´ÂúÁËÒ»¸ösector£¬Ö´ĞĞĞ´Èë²Ù×÷   4096¸öbyte
-            for(u8 j = 0; j < 16; j++)
+            //å†™æ»¡äº†ä¸€ä¸ªsectorï¼Œæ‰§è¡Œå†™å…¥æ“ä½œ   4096ä¸ªbyte
+            for(u8 j = 0; j < 16; j++)///é€pageå†™å…¥
             {
-                //»ñÈ¡µ±Ç°Ğ´ÈëµØÖ·
-                addr = (W25Qx_Para.SUBSECTOR_SIZE * s_ast_W25Q_Handler[block_index].write_sector_index) + \
+                //è·å–å½“å‰å†™å…¥åœ°å€
+                addr = (W25Qx_Para.SUBSECTOR_SIZE * s_st_W25Q_Handler_1[block_index].write_sector_index) + \
                         (W25Qx_Para.PAGE_SIZE * j);
-                addr += block_index * BLOCK_SIZE;
-                //Ö´ĞĞĞ´Èë²Ù×÷
+                        addr += block_index * BLOCK_SIZE;////////è®¡ç®—blockçš„åç§»åœ°å€
+                //æ‰§è¡Œå†™å…¥æ“ä½œ
                 index = W25Qx_Para.PAGE_SIZE * j;
-                W25Qx_Write(&s_ast_W25Q_Handler[block_index].databuf[index],addr,W25Qx_Para.PAGE_SIZE);
+                W25Qx_Write(&s_st_W25Q_Handler_1[block_index].databuf[index],addr,W25Qx_Para.PAGE_SIZE);
             }
-            s_ast_W25Q_Handler[block_index].write_sector_index++;
-            //¼ÇÂ¼×ÜµÄĞ´ÈëÊı¾İ³¤¶È
-            s_ast_W25Q_Handler[block_index].write_index += W25Qx_Para.SUBSECTOR_SIZE;
+            s_st_W25Q_Handler_1[block_index].write_sector_index++;
+            //è®°å½•æ€»çš„å†™å…¥æ•°æ®é•¿åº¦
+            s_st_W25Q_Handler_1[block_index].write_index += W25Qx_Para.SUBSECTOR_SIZE;
         }
     }
     return 0;
@@ -154,79 +148,84 @@ u8 W25Q64_WriteData_End(u8 block_index)
     u32 addr = 0;
     u16 index = 0;
     u8  page_size = 0;
-    //ÅĞ¶Ï»¹ÓĞÃ»ÓĞÊ£ÓàÊı¾İÃ»ÓĞÖ´ĞĞĞ´Èë
-    if(0 != s_ast_W25Q_Handler[block_index].write_databuf_index)
+    //åˆ¤æ–­è¿˜æœ‰æ²¡æœ‰å‰©ä½™æ•°æ®æ²¡æœ‰æ‰§è¡Œå†™å…¥
+    if(0 != s_st_W25Q_Handler_1[block_index].write_databuf_index)
     {
-        //Ğ´Èë´ÎÊı
-        page_size = s_ast_W25Q_Handler[block_index].write_databuf_index / W25Qx_Para.PAGE_SIZE;
-        //ÏÈÖ´ĞĞ²Á³ıÉÈÇø
-        addr = W25Qx_Para.SUBSECTOR_SIZE * s_ast_W25Q_Handler[block_index].write_sector_index;
-        addr += block_index * BLOCK_SIZE;
+        //å†™å…¥æ¬¡æ•°
+        page_size = s_st_W25Q_Handler_1[block_index].write_databuf_index / W25Qx_Para.PAGE_SIZE;
+        //å…ˆæ‰§è¡Œæ“¦é™¤æ‰‡åŒº
+        addr = W25Qx_Para.SUBSECTOR_SIZE * s_st_W25Q_Handler_1[block_index].write_sector_index;
+        addr += block_index * BLOCK_SIZE;////////è®¡ç®—blockçš„åç§»åœ°å€
+
         W25Qx_Erase_Block(addr);
         W25Qx_WriteEnable();
-        for(u8 j = 0; j < page_size; j++)
+        for(u8 j = 0; j < page_size; j++)//  page_size=0x02 0x280=640  
         {
-            //»ñÈ¡µ±Ç°Ğ´ÈëµØÖ·
-            addr = (W25Qx_Para.SUBSECTOR_SIZE * s_ast_W25Q_Handler[block_index].write_sector_index) + \
+            //è·å–å½“å‰å†™å…¥åœ°å€
+            addr = (W25Qx_Para.SUBSECTOR_SIZE * s_st_W25Q_Handler_1[block_index].write_sector_index) + \
                     (W25Qx_Para.PAGE_SIZE * j);
-            addr += block_index * BLOCK_SIZE;
-            //Ö´ĞĞĞ´Èë²Ù×÷
+                addr += block_index * BLOCK_SIZE;////////è®¡ç®—blockçš„åç§»åœ°å€
+            //æ‰§è¡Œå†™å…¥æ“ä½œ
             index = W25Qx_Para.PAGE_SIZE * j;
-            W25Qx_Write(&s_ast_W25Q_Handler[block_index].databuf[index],addr,W25Qx_Para.PAGE_SIZE);
+            W25Qx_Write(&s_st_W25Q_Handler_1[block_index].databuf[index],addr,W25Qx_Para.PAGE_SIZE);
         }
 
-        //ÓĞÃ»ÓĞĞ¡ÓÚ256µÄÊı¾İÁË
-        if(0 != (s_ast_W25Q_Handler[block_index].write_databuf_index % W25Qx_Para.PAGE_SIZE))
+        //æœ‰æ²¡æœ‰å°äº256çš„æ•°æ®äº†
+        if(0 != (s_st_W25Q_Handler_1[block_index].write_databuf_index % W25Qx_Para.PAGE_SIZE))
         {
-            //»ñÈ¡µ±Ç°Ğ´ÈëµØÖ·
-            addr = (W25Qx_Para.SUBSECTOR_SIZE * s_ast_W25Q_Handler[block_index].write_sector_index) + \
+            //è·å–å½“å‰å†™å…¥åœ°å€
+            addr = (W25Qx_Para.SUBSECTOR_SIZE * s_st_W25Q_Handler_1[block_index].write_sector_index) + \
                     (W25Qx_Para.PAGE_SIZE * page_size);
-            addr += block_index * BLOCK_SIZE;
-            //Ö´ĞĞĞ´Èë²Ù×÷
+                    addr += block_index * BLOCK_SIZE;////////è®¡ç®—blockçš„åç§»åœ°å€
+            //æ‰§è¡Œå†™å…¥æ“ä½œ
             index = W25Qx_Para.PAGE_SIZE * page_size;
-            W25Qx_Write(&s_ast_W25Q_Handler[block_index].databuf[index],addr, \
-                        s_ast_W25Q_Handler[block_index].write_databuf_index % W25Qx_Para.PAGE_SIZE);
+            W25Qx_Write(&s_st_W25Q_Handler_1[block_index].databuf[index],addr, \
+                        s_st_W25Q_Handler_1[block_index].write_databuf_index % W25Qx_Para.PAGE_SIZE);
         }
-        s_ast_W25Q_Handler[block_index].write_index += s_ast_W25Q_Handler[block_index].write_databuf_index;
+        s_st_W25Q_Handler_1[block_index].write_index += s_st_W25Q_Handler_1[block_index].write_databuf_index;
     }
     return 0;
 }
 
-/*Ã¿´Î¶ÁÈ¡Ò»¸öÉÈÇøµÄÊı¾İ£¬Íâ²¿½Ó¿ÚĞèÒªÒ»¸ö4096µÄbuffer
-length:Ã¿´Î¶ÁÈ¡³öÀ´µÄ³¤¶È£¬´Ó»º³åÇø¶ÁÈ¡
+/*æ¯æ¬¡è¯»å–ä¸€ä¸ªæ‰‡åŒºçš„æ•°æ®ï¼Œå¤–éƒ¨æ¥å£éœ€è¦ä¸€ä¸ª4096çš„buffer
+length:æ¯æ¬¡è¯»å–å‡ºæ¥çš„é•¿åº¦ï¼Œä»ç¼“å†²åŒºè¯»å–
 return : 
-        0:±íÊ¾¶ÁÈ¡³É¹¦
-        1:¶ÁÈ¡Íê±Ï  Ã»ÓĞÊı¾İÁË
-        2:¶ÁÈ¡Ê§°Ü  ¶ÁÈ¡´íÎó
+        0:è¡¨ç¤ºè¯»å–æˆåŠŸ
+        1:è¯»å–å®Œæ¯•  æ²¡æœ‰æ•°æ®äº†
+        2:è¯»å–å¤±è´¥  è¯»å–é”™è¯¯
 */
 u8 W25Q64_ReadData(u8 block_index, u8 *data, u16 *length)
 {
+    u8 ret = 0;
     u32 addr = 0;
+    u16 index = 0;
+    u8  page_size = 0;
+    u16  remain_size = 0;
 
-    //1.ÏÈÅĞ¶ÏÊÇ·ñ¶ÁÈ¡Íê±Ï
-    if(s_ast_W25Q_Handler[block_index].write_index > s_ast_W25Q_Handler[block_index].read_index)
+    //1.å…ˆåˆ¤æ–­æ˜¯å¦è¯»å–å®Œæ¯•
+    if(s_st_W25Q_Handler_1[block_index].write_index > s_st_W25Q_Handler_1[block_index].read_index)
     {
-        //ÅĞ¶ÏÏÂÊı¾İÊÇ·ñ¹»4K
-        if(s_ast_W25Q_Handler[block_index].write_sector_index > s_ast_W25Q_Handler[block_index].read_sector_index)
+        //åˆ¤æ–­ä¸‹æ•°æ®æ˜¯å¦å¤Ÿ4K
+        if(s_st_W25Q_Handler_1[block_index].write_sector_index > s_st_W25Q_Handler_1[block_index].read_sector_index)
         {
-            //¶Á4KÊı¾İµÄ²Ù×÷
-            *length = W25Qx_Para.SUBSECTOR_SIZE;
-            addr = s_ast_W25Q_Handler[block_index].read_sector_index * W25Qx_Para.SUBSECTOR_SIZE;
-            addr += block_index * BLOCK_SIZE;
+            //è¯»4Kæ•°æ®çš„æ“ä½œ
+            *length = W25Qx_Para.SUBSECTOR_SIZE;//4k size
+            addr = s_st_W25Q_Handler_1[block_index].read_sector_index * W25Qx_Para.SUBSECTOR_SIZE;
+            addr += block_index * BLOCK_SIZE;////////è®¡ç®—blockçš„åç§»åœ°å€
             if(0 != W25Qx_Read(data,addr,*length))
                 return 2;
-            s_ast_W25Q_Handler[block_index].read_sector_index++;
+            s_st_W25Q_Handler_1[block_index].read_sector_index++;
         }
         else
         {
-            //¶Á4KÒÔÄÚµÄÊı¾İ
-            *length = s_ast_W25Q_Handler[block_index].write_index - s_ast_W25Q_Handler[block_index].read_index;
-            addr = s_ast_W25Q_Handler[block_index].read_sector_index * W25Qx_Para.SUBSECTOR_SIZE;
-            addr += block_index * BLOCK_SIZE;
+            //è¯»4Kä»¥å†…çš„æ•°æ®--write_index - read_index 
+            *length = s_st_W25Q_Handler_1[block_index].write_index - s_st_W25Q_Handler_1[block_index].read_index;
+            addr = s_st_W25Q_Handler_1[block_index].read_sector_index * W25Qx_Para.SUBSECTOR_SIZE;
+                addr += block_index * BLOCK_SIZE;////////è®¡ç®—blockçš„åç§»åœ°å€
             if(0 != W25Qx_Read(data,addr,*length))
                 return 2;
         }
-        s_ast_W25Q_Handler[block_index].read_index += *length;
+        s_st_W25Q_Handler_1[block_index].read_index += *length;
         return 0;
     }
     else

@@ -117,6 +117,11 @@
       <TargetDriverDllRegistry>
         <SetRegEntry>
           <Number>0</Number>
+          <Key>DLGUARM</Key>
+          <Name>/</Name>
+        </SetRegEntry>
+        <SetRegEntry>
+          <Number>0</Number>
           <Key>ARMRTXEVENTFLAGS</Key>
           <Name>-L70 -Z18 -C0 -M0 -T1</Name>
         </SetRegEntry>
@@ -145,9 +150,25 @@
         <Bp>
           <Number>0</Number>
           <Type>0</Type>
+          <LineNumber>281</LineNumber>
+          <EnabledFlag>1</EnabledFlag>
+          <Address>134227136</Address>
+          <ByteObject>0</ByteObject>
+          <HtxType>0</HtxType>
+          <ManyObjects>0</ManyObjects>
+          <SizeOfObject>0</SizeOfObject>
+          <BreakByAccess>0</BreakByAccess>
+          <BreakIfRCount>1</BreakIfRCount>
+          <Filename>..\Task\BL_JMP\manage_jmp.c</Filename>
+          <ExecCommand></ExecCommand>
+          <Expression>\\template\../Task/BL_JMP/manage_jmp.c\281</Expression>
+        </Bp>
+        <Bp>
+          <Number>1</Number>
+          <Type>0</Type>
           <LineNumber>113</LineNumber>
           <EnabledFlag>1</EnabledFlag>
-          <Address>134243156</Address>
+          <Address>134240788</Address>
           <ByteObject>0</ByteObject>
           <HtxType>0</HtxType>
           <ManyObjects>0</ManyObjects>
@@ -159,43 +180,11 @@
           <Expression>\\template\../Core/Src/main.c\113</Expression>
         </Bp>
         <Bp>
-          <Number>1</Number>
-          <Type>0</Type>
-          <LineNumber>102</LineNumber>
-          <EnabledFlag>1</EnabledFlag>
-          <Address>134243124</Address>
-          <ByteObject>0</ByteObject>
-          <HtxType>0</HtxType>
-          <ManyObjects>0</ManyObjects>
-          <SizeOfObject>0</SizeOfObject>
-          <BreakByAccess>0</BreakByAccess>
-          <BreakIfRCount>1</BreakIfRCount>
-          <Filename>..\Core\Src\main.c</Filename>
-          <ExecCommand></ExecCommand>
-          <Expression>\\template\../Core/Src/main.c\102</Expression>
-        </Bp>
-        <Bp>
           <Number>2</Number>
-          <Type>0</Type>
-          <LineNumber>76</LineNumber>
-          <EnabledFlag>1</EnabledFlag>
-          <Address>134230784</Address>
-          <ByteObject>0</ByteObject>
-          <HtxType>0</HtxType>
-          <ManyObjects>0</ManyObjects>
-          <SizeOfObject>0</SizeOfObject>
-          <BreakByAccess>0</BreakByAccess>
-          <BreakIfRCount>1</BreakIfRCount>
-          <Filename>..\Task\BL_JMP\manage_jmp.c</Filename>
-          <ExecCommand></ExecCommand>
-          <Expression>\\template\../Task/BL_JMP/manage_jmp.c\76</Expression>
-        </Bp>
-        <Bp>
-          <Number>3</Number>
           <Type>0</Type>
           <LineNumber>89</LineNumber>
           <EnabledFlag>1</EnabledFlag>
-          <Address>134230824</Address>
+          <Address>134228710</Address>
           <ByteObject>0</ByteObject>
           <HtxType>0</HtxType>
           <ManyObjects>0</ManyObjects>
@@ -207,11 +196,11 @@
           <Expression>\\template\../Task/BL_JMP/manage_jmp.c\89</Expression>
         </Bp>
         <Bp>
-          <Number>4</Number>
+          <Number>3</Number>
           <Type>0</Type>
-          <LineNumber>82</LineNumber>
+          <LineNumber>63</LineNumber>
           <EnabledFlag>1</EnabledFlag>
-          <Address>134230800</Address>
+          <Address>134228632</Address>
           <ByteObject>0</ByteObject>
           <HtxType>0</HtxType>
           <ManyObjects>0</ManyObjects>
@@ -220,14 +209,30 @@
           <BreakIfRCount>1</BreakIfRCount>
           <Filename>..\Task\BL_JMP\manage_jmp.c</Filename>
           <ExecCommand></ExecCommand>
-          <Expression>\\template\../Task/BL_JMP/manage_jmp.c\82</Expression>
+          <Expression>\\template\../Task/BL_JMP/manage_jmp.c\63</Expression>
+        </Bp>
+        <Bp>
+          <Number>4</Number>
+          <Type>0</Type>
+          <LineNumber>75</LineNumber>
+          <EnabledFlag>1</EnabledFlag>
+          <Address>134228672</Address>
+          <ByteObject>0</ByteObject>
+          <HtxType>0</HtxType>
+          <ManyObjects>0</ManyObjects>
+          <SizeOfObject>0</SizeOfObject>
+          <BreakByAccess>0</BreakByAccess>
+          <BreakIfRCount>1</BreakIfRCount>
+          <Filename>..\Task\BL_JMP\manage_jmp.c</Filename>
+          <ExecCommand></ExecCommand>
+          <Expression>\\template\../Task/BL_JMP/manage_jmp.c\75</Expression>
         </Bp>
         <Bp>
           <Number>5</Number>
           <Type>0</Type>
-          <LineNumber>91</LineNumber>
+          <LineNumber>77</LineNumber>
           <EnabledFlag>1</EnabledFlag>
-          <Address>134230828</Address>
+          <Address>134228676</Address>
           <ByteObject>0</ByteObject>
           <HtxType>0</HtxType>
           <ManyObjects>0</ManyObjects>
@@ -236,60 +241,44 @@
           <BreakIfRCount>1</BreakIfRCount>
           <Filename>..\Task\BL_JMP\manage_jmp.c</Filename>
           <ExecCommand></ExecCommand>
-          <Expression>\\template\../Task/BL_JMP/manage_jmp.c\91</Expression>
+          <Expression>\\template\../Task/BL_JMP/manage_jmp.c\77</Expression>
         </Bp>
         <Bp>
           <Number>6</Number>
           <Type>0</Type>
-          <LineNumber>63</LineNumber>
+          <LineNumber>81</LineNumber>
           <EnabledFlag>1</EnabledFlag>
-          <Address>0</Address>
+          <Address>134228680</Address>
           <ByteObject>0</ByteObject>
           <HtxType>0</HtxType>
           <ManyObjects>0</ManyObjects>
           <SizeOfObject>0</SizeOfObject>
           <BreakByAccess>0</BreakByAccess>
-          <BreakIfRCount>0</BreakIfRCount>
+          <BreakIfRCount>1</BreakIfRCount>
           <Filename>..\Task\BL_JMP\manage_jmp.c</Filename>
           <ExecCommand></ExecCommand>
-          <Expression></Expression>
+          <Expression>\\template\../Task/BL_JMP/manage_jmp.c\81</Expression>
         </Bp>
         <Bp>
           <Number>7</Number>
           <Type>0</Type>
-          <LineNumber>75</LineNumber>
+          <LineNumber>308</LineNumber>
           <EnabledFlag>1</EnabledFlag>
-          <Address>0</Address>
+          <Address>134227224</Address>
           <ByteObject>0</ByteObject>
           <HtxType>0</HtxType>
           <ManyObjects>0</ManyObjects>
           <SizeOfObject>0</SizeOfObject>
           <BreakByAccess>0</BreakByAccess>
-          <BreakIfRCount>0</BreakIfRCount>
+          <BreakIfRCount>1</BreakIfRCount>
           <Filename>..\Task\BL_JMP\manage_jmp.c</Filename>
           <ExecCommand></ExecCommand>
-          <Expression></Expression>
+          <Expression>\\template\../Task/BL_JMP/manage_jmp.c\308</Expression>
         </Bp>
         <Bp>
           <Number>8</Number>
           <Type>0</Type>
-          <LineNumber>77</LineNumber>
-          <EnabledFlag>1</EnabledFlag>
-          <Address>0</Address>
-          <ByteObject>0</ByteObject>
-          <HtxType>0</HtxType>
-          <ManyObjects>0</ManyObjects>
-          <SizeOfObject>0</SizeOfObject>
-          <BreakByAccess>0</BreakByAccess>
-          <BreakIfRCount>0</BreakIfRCount>
-          <Filename>..\Task\BL_JMP\manage_jmp.c</Filename>
-          <ExecCommand></ExecCommand>
-          <Expression></Expression>
-        </Bp>
-        <Bp>
-          <Number>9</Number>
-          <Type>0</Type>
-          <LineNumber>81</LineNumber>
+          <LineNumber>82</LineNumber>
           <EnabledFlag>1</EnabledFlag>
           <Address>0</Address>
           <ByteObject>0</ByteObject>

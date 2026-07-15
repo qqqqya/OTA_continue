@@ -1,6 +1,7 @@
 #include "iic.h"
+#include "AT24Cxx_Driver.h"
 
-#include "at24cxx_driver.h"
+
 /* GPIO结构体初始化 */
 static void i2c_cfgGpio(void)
 {
@@ -8,7 +9,6 @@ static void i2c_cfgGpio(void)
 
   /* GPIO Ports Clock Enable */
   RCC_AHB1PeriphClockCmd(EEPROM_I2C_GPIO_CLK, ENABLE);
-
   /*Configure GPIO pin : PtPin */
   GPIO_InitStruct.GPIO_Pin = EEPROM_I2C_SCL_PIN|EEPROM_I2C_SDA_PIN;
   GPIO_InitStruct.GPIO_Mode = GPIO_Mode_OUT;
@@ -16,7 +16,7 @@ static void i2c_cfgGpio(void)
   GPIO_InitStruct.GPIO_Speed = GPIO_Speed_100MHz;
 	GPIO_InitStruct.GPIO_OType = GPIO_OType_OD;
   GPIO_Init(EEPROM_I2C_GPIO_PORT, &GPIO_InitStruct);
-  
+
  /* 给一个停止信号, 复位I2C总线上的所有设备到待机模式 */
  i2c_Stop();
 }
