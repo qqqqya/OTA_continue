@@ -56,6 +56,7 @@ void W25Q64_Init(void);
 u8 W25Q64_EraseChip(void);
 u8 Erase_Flash_Block(u8 block_index);
 uint32_t Read_BlockSize(u8 block_index);
+u8 W25Q64_SetBlockIndex(u8 block_index, u32 app_size);
 
 u8 W25Q64_WriteData(u8 block_index, u8 *data, u32 length);
 u8 W25Q64_WriteData_End(u8 block_index);

@@ -103,7 +103,23 @@ u8 Erase_Flash_Block(u8 block_index){
     s_st_W25Q_Handler_1[block_index].write_sector_index = 0;
     return 0;
 }
-
+u8 W25Q64_SetBlockIndex(u8 block_index, u32 app_size)
+{   /*0.*/
+    s_st_W25Q_Handler_1[block_index].write_index = app_size;
+    /*1.计算sector_index 直接除以BLOCK_SIZE---一般都是小于64KB的程序*/
+    s_st_W25Q_Handler_1[block_index].write_sector_index= app_size / BLOCK_SIZE;
+    /*2.计算databuf_index---4096max 直接取余*/
+    s_st_W25Q_Handler_1[block_index].write_databuf_index= app_size % BLOCK_SIZE;
+    return 0;
+}
+/**
+ * @brief 写入数据到指定block
+ * 
+ * @param block_index block的索引，0或1
+ * @param data 要写入的数据指针
+ * @param length 要写入的数据长度
+ * @return u8 0:成功 1:失败
+ */
 u8 W25Q64_WriteData(u8 block_index, u8 *data, u32 length)
 {
     u8 ret = 0;
@@ -125,7 +141,7 @@ u8 W25Q64_WriteData(u8 block_index, u8 *data, u32 length)
             W25Qx_Erase_Block(addr);
             W25Qx_WriteEnable();
             //写满了一个sector，执行写入操作   4096个byte
-            for(u8 j = 0; j < 16; j++)///逐page写入
+            for(u8 j = 0; j < 16; j++)///逐page写入  256个byte
             {
                 //获取当前写入地址
                 addr = (W25Qx_Para.SUBSECTOR_SIZE * s_st_W25Q_Handler_1[block_index].write_sector_index) + \

@@ -21,18 +21,18 @@
 #include "usart.h"
 
 /* USER CODE BEGIN 0 */
-#include "stdio.h"
-#ifdef	__GNUC__
-	#define PUTCHAR_PROTTYPE int _io_putchar(int ch)
-#else
-	#define PUTCHAR_PROTOTYPE int fputc(int ch, FILE *f)
-#endif /*__GNUC__*/
-//int fputc(int ch, FILE *f)
-PUTCHAR_PROTOTYPE
-{ 
-HAL_UART_Transmit(&huart1, (uint8_t *)&ch, 1, 0xFFFF); // 注意这个超时时间
-return ch;
-}
+//#include "stdio.h"
+//#ifdef	__GNUC__
+//	#define PUTCHAR_PROTTYPE int _io_putchar(int ch)
+//#else
+//	#define PUTCHAR_PROTOTYPE int fputc(int ch, FILE *f)
+//#endif /*__GNUC__*/
+////int fputc(int ch, FILE *f)
+//PUTCHAR_PROTOTYPE
+//{ 
+//HAL_UART_Transmit(&huart1, (uint8_t *)&ch, 1, 0xFFFF); // 注意这个超时时间
+//return ch;
+//}
 /* USER CODE END 0 */
 
 UART_HandleTypeDef huart1;

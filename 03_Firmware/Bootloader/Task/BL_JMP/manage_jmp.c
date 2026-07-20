@@ -37,10 +37,9 @@
 
 
 typedef void (*pFunc)(void);      //pFunc 是变量名'，类型是 void (*)(void)。
-pFunc Jump2Application;//函数指针类型--变量 
+// pFunc Jump2Application;//函数指针类型--变量 
                         //完全等价与 void (*Jump2Application)(void) 
 
-uint32_t JumpAddress;//跳转地址
 uint16_t app_size = 0;//APP程序大小
 
 uint8_t au8_test[1024]; //测试数据缓存
@@ -94,22 +93,66 @@ void Ota_statemanage(void){
       break;
     case APP_DOWNLOADING://0x11--EEPROM--说明，只是进行了协议握手，但是没有传输成功文件
       log_a("App dowload failed");//1、如果下载不成功的话，就会卡在11这个状态码上
-      Jump2App();
-      log_a("NO VALID APP!!");//2、ApP地址上没有固件，要重新下载固件
-
+      Jump2App();                 //说明是APP工程，下载的时候变失败
+      log_a("NO VALID APP!!");//2、ApP地址上没有固件/数据错误，要重新下载固件
+      /*2.1 没有传输成功文件，那么就进行跳转到上一个版本的固件，如果跳转固件失败，就说明固件受损。
+      所以大多数情况下都只是上面的这两句，下面的这些会很少触发*/
       //3、接收数据，然后后面进行跳转
-
-      //跳转失败，下载新App
+      fil_size = Ymodem_Receive(au8_test);
+       if(0 == ExA_To_ExB_AES(fil_size))
+        {
+        /*3.拷贝当前的APP程序 到exflash A区--为了回滚使用*/
+          ee_ReadBytes((uint8_t *)&t_u32_appsize,0x05,4);//app程序大小
+          App_To_ExA(t_u32_appsize);//0X05存的是当前APP字节大小
+        /*4.exflash B区的解密后数据加载到片上flash*/
+          ExB_To_App();
+        /*5.跳转APP程序*/
+          Jump2App();
+    //这里其实就是如果跳转不成功，就将上一次备份的能运行的程序再一次的拷贝回片上flash中
+          // /*6.如果运行到这一步，说明数据无效，把外部A区的数据搬运到App中*/
+          ExA_To_App();
+          /*再执行一次跳转*/
+          Jump2App();
+        }
+        else
+        {
+          //解密不成功，直接跳转APP程序，不进行其他操作
+          log_e("Download Failed!");
+          Jump2App();
+        }
       break;
+
     case APP_DOWNLOAD_COMPLETE://0x22--说明，更新完成，把上个版本的估计被分到ex flash, 方便回滚
       // 读取当前需要更新的App的大小--4字节大小；从01地址开始读
         //0X 01存的是新APP的字体大小，0X05存的是当前APP字节大小
       ee_ReadBytes((uint8_t *)&t_u32_appsize,0x01,4);
-      //2.App大小更新到内部flash存储数据量的管理结构体中
-
+      /*1.App大小更新到--内部flash存储数据量的管理结构体中*/
+        //也就是flash的index
+        W25Q64_SetBlockIndex(BLOCK_1,t_u32_appsize);//更新 区的index
       /*2.解密数据到exflash B区*/ //因为之前的数据已经从APP的过程中接收成功
+        if(0 == ExA_To_ExB_AES(t_u32_appsize))//--//APP下载成功这个分支里面说明是，APP在进行接收固件包，所以局部变量 `fil_size` 的值一直是初始值 
+        { /*之前用的fil_size；一直是初始化值，在上面这个判断里面直接会返回-1，
+              解密失败，然后就会跳回到之前的固件上*/
+      /*3.拷贝当前的APP程序 到exflash A区--为了回滚使用*/
+          ee_ReadBytes((uint8_t *)&t_u32_appsize,0x05,4);//app程序大小
+          App_To_ExA(t_u32_appsize);              //0X05存的是当前APP字节大小
+        /*4.exflash B区的解密后数据加载到片上flash*/
+          ExB_To_App();
+        /*5.跳转APP程序*/
+          Jump2App();
+    //这里其实就是如果跳转不成功，就将上一次备份的能运行的程序再一次的拷贝回片上flash中
+          // /*6.如果运行到这一步，说明数据无效，把外部A区的数据搬运到App中*/
+          ExA_To_App();
+          /*再执行一次跳转*/
+          Jump2App();
+        }
+        else
+        {
+          //解密不成功，直接跳转APP程序，不进行其他操作
+          log_e("BOOT Download Failed!");
+          Jump2App();
+        }
 
-      /*3.将解密后的数据加载到片上flash*/
       
       break;
     default:
@@ -204,7 +247,7 @@ int8_t ExA_To_ExB_AES(int32_t fl_size){
  * @param fl_size 
  */
 int8_t App_To_ExA(int32_t fl_size){
-  u8 flash_des=ApplicationAddress;
+  u32 flash_des=ApplicationAddress;
 
     if(fl_size <= 0)
   {
@@ -215,7 +258,7 @@ int8_t App_To_ExA(int32_t fl_size){
   {//appsize 在ymodemn.c中已经解析出来了
     return -1;
   }
-  Erase_Flash_Block(BLOCK_1);//擦除A区
+  Erase_Flash_Block(BLOCK_1);//擦除A区--只是清除结构体
   W25Q64_WriteData(BLOCK_1,(u8 *)flash_des,fl_size);//将当前的APP程序搬运到外部flash A区
   W25Q64_WriteData_End(BLOCK_1);
   
@@ -590,6 +633,10 @@ int8_t AES_Backup2App(int32_t fl_size){
 }
 
  void Jump2App(void){
+  pFunc Jump2Application;//函数指针类型--变量 
+                        //完全等价与 void (*Jump2Application)(void) 
+
+  uint32_t JumpAddress;//跳转地址
      /* 检查栈顶地址是否合法 */
      if(((*(__IO uint32_t *)ApplicationAddress) & 0x2FFE0000) == 0x20000000)
      {
@@ -600,7 +647,7 @@ int8_t AES_Backup2App(int32_t fl_size){
          RCC_DeInit();
          /* 用户代码区第二个 字 为程序开始地址(复位地址) */
          JumpAddress = *(__IO uint32_t *) (ApplicationAddress + 4);
-// 		printf("jump addr :0x%08X\r\n",JumpAddress);
+                  // 		printf("jump addr :0x%08X\r\n",JumpAddress);
          /* Initialize user application's Stack Pointer */
          /* 初始化APP堆栈指针(用户代码区的第一个字用于存放栈顶地址) */
          __set_MSP(*(__IO uint32_t *) ApplicationAddress);///将8000的MSP重新设置

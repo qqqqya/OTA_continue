@@ -37,6 +37,8 @@ extern QueueHandle_t Queue_AppDataBuffer;/// 下载buf切换---队列
 extern SemaphoreHandle_t Semaphore_ExtFlashState;/// 外部flash---互斥量
 
 static uint16_t s_u16_YmodRecLength;  //接收数据长度//from RxEvent isr
+uint32_t g_u32_datalength = 0;//接收数据长度 for DownloadAppData_task
+
 /* Private function prototypes -----------------------------------------------*/
 /* Private functions ---------------------------------------------------------*/
 
@@ -218,6 +220,8 @@ int32_t Ymodem_Receive (uint8_t *buf1,uint8_t *buf2)
                 else
                 {///这一段没懂-就是跳过帧头的头信息 之后在恢复
                   packet_data += PACKET_HEADER;//跳过头信息
+                  g_u32_datalength = packet_length;
+
                   xQueueSend(Queue_AppDataBuffer,&packet_data,0);//// 将数据指针发送到队列
 									packet_data -= PACKET_HEADER;//恢复帧头地址
 									

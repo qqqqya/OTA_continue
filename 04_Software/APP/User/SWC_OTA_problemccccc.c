@@ -10,7 +10,7 @@ osThreadId_t OTATaskHandle;
 const osThreadAttr_t OTATask_attributes = {
   .name = "OTATask",
   .stack_size = 512 * 4,
-  .priority = (osPriority_t) osPriorityNormal,
+  .priority = (osPriority_t) osPriorityNormal,//25
 };
 uint8_t g_au8_YmodemRec_A[1030];//1024数据+3头+2校验  +1
 uint8_t g_au8_YmodemRec_B[1030];//1024数据+3头+2校验  +1
@@ -25,7 +25,7 @@ osThreadId_t DownloadAppData_taskHandle;
 const osThreadAttr_t DownloadAppData_task_attributes = {
   .name = "DownloadAppData_task",
   .stack_size = 512 * 4,
-  .priority = (osPriority_t) osPriorityNormal,
+  .priority = (osPriority_t) osPriorityNormal,//osPriorityNormal 1 25--normal--24
 };
 QueueHandle_t Queue_AppDataBuffer;/// 下载buf切换---队列
 SemaphoreHandle_t Semaphore_ExtFlashState;/// 外部flash---互斥量
@@ -50,7 +50,7 @@ void DownloadAppData_task(void *argument);
 
 void ota_task_runnable(void *argument)
 {
-	uint8_t t_u8_rec_length=0;//接收数据长度
+	uint16_t t_u16_rec_length=0;//接收数据长度
   uint8_t t_au8_AckCmd[] = {0x44,0x55,0x66};  
   uint32_t t_u32_data_length=0;//数据长度
   W25Q64_Init();
@@ -65,9 +65,9 @@ void ota_task_runnable(void *argument)
         /*1.阻塞式接收串口命令-------接收到的是串口命令*/
         HAL_UARTEx_ReceiveToIdle_DMA(&huart1, s_au8_OtaCmd, 4);
         /*2.等待数据接收完成*///from RxEvent isr
-        xQueueReceive(Q_YmodemReclength,&t_u8_rec_length,portMAX_DELAY);
+        xQueueReceive(Q_YmodemReclength,&t_u16_rec_length,portMAX_DELAY);
         /*3.校验数据长度*/
-        if(3 == t_u8_rec_length){
+        if(3 == t_u16_rec_length){
           /*4.校验数据内容---是否等于设定的命令*/
           if((0x11 == s_au8_OtaCmd[0]) && (0x22 == s_au8_OtaCmd[1]) && (0x33 == s_au8_OtaCmd[2]))
           {
@@ -78,6 +78,7 @@ void ota_task_runnable(void *argument)
             Queue_AppDataBuffer = xQueueCreate(2, sizeof(uint8_t * ));//Ymodem协议发送==过来的数据地址==
             Semaphore_ExtFlashState = xSemaphoreCreateMutex();//外部flash---互斥量
 
+            //已经接收到112233的指令，开始进入下载，后续和主机握手
           t_u8_otastate = 0x11;//App数据下载过程中
           //app数据下载过程中--更新eeprom的OTA状态--有更新
           ee_WriteBytes(&t_u8_otastate,0x00,1);
@@ -100,34 +101,40 @@ void ota_task_runnable(void *argument)
         }
         break;
       case OtaDownload:/** @brief OTA数据下载中 下载完成还是要等命令*/
-          t_u32_data_length=Ymodem_Receive(g_au8_YmodemRec_A,g_au8_YmodemRec_B);
-          if(0<t_u32_data_length){
+        t_u32_data_length=Ymodem_Receive(g_au8_YmodemRec_A,g_au8_YmodemRec_B);
+        if(0<t_u32_data_length){
             g_Ota_State = WaitReqUpdate;
             /*接收数据成功  发送确认命令44 55 66*/
             HAL_UART_Transmit(&huart1, t_au8_AckCmd, 3, 0xFFFF);
+
             /** @brief 写入不满1sec的数据 --之前的数据已经在DownloadAppData_task_runnable中写入了*/
-            W25Q64_WriteData_End();
-            /*清除一切生成的资源*/
-              vTaskDelete(DownloadAppData_taskHandle);
-              vQueueDelete(Queue_AppDataBuffer);
-              vSemaphoreDelete(Semaphore_ExtFlashState);
+          xSemaphoreTake(Semaphore_ExtFlashState,portMAX_DELAY);
+					xSemaphoreGive(Semaphore_ExtFlashState);
 
-              t_u8_otastate = 0x22;//App请求更新App
-              //app请求更新App--更新eeprom的OTA状态--有更新
-              ee_WriteBytes(&t_u8_otastate,0x00,1);
+          W25Q64_WriteData_End();
+					
+          vTaskDelete(DownloadAppData_taskHandle);
+          vQueueDelete(Queue_AppDataBuffer);
+          vSemaphoreDelete(Semaphore_ExtFlashState);
 
-              //写入数据长度--在01地址 写入数据长度
-                ee_WriteBytes((uint8_t *)&t_u32_data_length,0x01,sizeof(t_u32_data_length));
+            //从协议中接收完成；已经将传输的数据写在临时的RAM中；重启，等待PC发送指令进行更新，也就是请求更新；
+            //从这之后，从机也可以将传输过来的数据大小、数据长度写入eeprom的01地址
+            t_u8_otastate = 0x22;//App请求更新App
+            //app请求更新App--更新eeprom的OTA状态--有更新
+            ee_WriteBytes(&t_u8_otastate,0x00,1);
 
-                        //Test 
-              uint8_t t_u8_readstate = 0;
-              ee_ReadBytes(&t_u8_readstate,0x00,1);
-              HAL_UART_Transmit(&huart1,&t_u8_readstate,1,1000);
-                        //Test 
-              uint8_t t_au8_readlength[4] = {0};
-              ee_ReadBytes(t_au8_readlength,0x01,4);
-              HAL_UART_Transmit(&huart1,t_au8_readlength,4,1000);
-          }
+            //写入数据长度--在01地址 写入数据长度
+            ee_WriteBytes((uint8_t *)&t_u32_data_length,0x01,sizeof(t_u32_data_length));
+
+                //Test 
+            uint8_t t_u8_readstate = 0;
+            ee_ReadBytes(&t_u8_readstate,0x00,1);
+            HAL_UART_Transmit(&huart1,&t_u8_readstate,1,1000);
+                //Test 
+            uint8_t t_au8_readlength[4] = {0};
+            ee_ReadBytes(t_au8_readlength,0x01,4);
+            HAL_UART_Transmit(&huart1,t_au8_readlength,4,1000);
+		      }
           else
           {/** @brief 接收数据失败*/
             g_Ota_State = WaitReqDownload;
@@ -141,19 +148,14 @@ void ota_task_runnable(void *argument)
       case WaitReqUpdate:/** @brief 等待PC请求更新App*/
         HAL_UARTEx_ReceiveToIdle_DMA(&huart1, s_au8_OtaCmd, 4);
         /*2.等待数据接收完成*/
-        xQueueReceive(Q_YmodemReclength,&t_u8_rec_length,portMAX_DELAY);//from RxEvent isr
+        xQueueReceive(Q_YmodemReclength,&t_u16_rec_length,portMAX_DELAY);//from RxEvent isr  t_u8_rec_length
         /*3.校验数据长度*/
-        if(3 == t_u8_rec_length){
+        if(3 == t_u16_rec_length){
           /*4.校验数据内容---是否等于设定的命令*/
           if((0x77 == s_au8_OtaCmd[0]) && (0x88 == s_au8_OtaCmd[1]) && (0x99 == s_au8_OtaCmd[2]))
           {
             /*切换状态---到结束状态*/
             g_Ota_State = OtaEnd;
-            /*创建线程以及相关队列*/
-            //TODO Add
-
-            //app请求更新App 
-            ee_WriteBytes(&t_u8_otastate,0x02,1);
           }
           else
           {/** @brief 重置接收的命令*/
@@ -207,7 +209,9 @@ void soft_reset(void){
 	__set_FAULTMASK(1);
     NVIC_SystemReset();
 }
+extern uint32_t g_u32_datalength;//接收数据长度 for DownloadAppData_task
 extern int32_t packet_length;
+
 void DownloadAppData_task(void *argument){
   uint8_t * pu8_data = NULL;  //数据指针
   int32_t * pu32_size = NULL;//数据大小
@@ -224,8 +228,9 @@ void DownloadAppData_task(void *argument){
     }
     //TODO Add
     //写入外部flash
-    //外部声明的变量packet_length
-    W25Q64_WriteData(pu8_data,(uint32_t)packet_length);//数据长度转换下
+    //外部声明的变量g_u32_datalength
+    W25Q64_WriteData(pu8_data,(uint32_t)packet_length);
+    // W25Q64_WriteData(pu8_data,g_u32_datalength);
     xSemaphoreGive(Semaphore_ExtFlashState);
   }
 }
