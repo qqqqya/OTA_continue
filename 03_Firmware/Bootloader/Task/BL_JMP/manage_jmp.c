@@ -39,7 +39,10 @@
 typedef void (*pFunc)(void);      //pFunc 是变量名'，类型是 void (*)(void)。
 // pFunc Jump2Application;//函数指针类型--变量 
                         //完全等价与 void (*Jump2Application)(void) 
+  pFunc Jump2Application;//函数指针类型--变量 
+                        //完全等价与 void (*Jump2Application)(void) 
 
+  uint32_t JumpAddress;//跳转地址
 uint16_t app_size = 0;//APP程序大小
 
 uint8_t au8_test[1024]; //测试数据缓存
@@ -206,6 +209,10 @@ int8_t ExA_To_ExB_AES(int32_t fl_size){
       }
       Read_Memory_index += 16;
     }
+    else
+    {
+      return -1;
+    }
 
     //数据帧
     //擦除外部flash比较耗时--这里先不擦出、对于A区在擦除
@@ -249,12 +256,8 @@ int8_t ExA_To_ExB_AES(int32_t fl_size){
 int8_t App_To_ExA(int32_t fl_size){
   u32 flash_des=ApplicationAddress;
 
-    if(fl_size <= 0)
-  {
-    return -1;
-  }
-  if ((app_size > (0x18010 - 1)) ||\
-  (app_size < 0))//这里的96kb表示  划分的APP运行区就是96 KB
+  if ((fl_size > (0x18010 - 1)) ||\
+  (fl_size < 0))//这里的96kb表示  划分的APP运行区就是96 KB
   {//appsize 在ymodemn.c中已经解析出来了
     return -1;
   }
@@ -354,7 +357,7 @@ int8_t ExA_To_App(void)
         //循环搬运flash数据
         for(writeTime = 0; writeTime < (Read_Memorysize/4);writeTime++)
         {
-          Flash_Write(FlashDes,RamSource);
+          Flash_Write(FlashDes,*(uint32_t *)RamSource);
           FlashDes += 4;
           RamSource += 4;
         }
@@ -633,10 +636,7 @@ int8_t AES_Backup2App(int32_t fl_size){
 }
 
  void Jump2App(void){
-  pFunc Jump2Application;//函数指针类型--变量 
-                        //完全等价与 void (*Jump2Application)(void) 
 
-  uint32_t JumpAddress;//跳转地址
      /* 检查栈顶地址是否合法 */
      if(((*(__IO uint32_t *)ApplicationAddress) & 0x2FFE0000) == 0x20000000)
      {

@@ -149,11 +149,11 @@ void ota_task_runnable(void *argument)
           {
             /*切换状态---到结束状态*/
             g_Ota_State = OtaEnd;
-            /*创建线程以及相关队列*/
-            //TODO Add
-
-            //app请求更新App 
-            ee_WriteBytes(&t_u8_otastate,0x02,1);
+            // /*创建线程以及相关队列*/
+            // //TODO Add
+////////,eiyou
+            // //app请求更新App 
+            // ee_WriteBytes(&t_u8_otastate,0x02,1);
           }
           else
           {/** @brief 重置接收的命令*/
@@ -208,13 +208,17 @@ void soft_reset(void){
     NVIC_SystemReset();
 }
 extern int32_t packet_length;
+extern uint32_t g_u32_datalength;
 void DownloadAppData_task(void *argument){
-  uint8_t * pu8_data = NULL;  //数据指针
-  int32_t * pu32_size = NULL;//数据大小
+  uint8_t * pu8_data = NULL;  //数据帧  帧头指针
+  int32_t * pu32_size = NULL;//数据帧大小  包含文件名长度
   // 好像这里是file name  --也包含长度，文件大小  pu32_size
   xQueueReceive(Queue_AppDataBuffer,&pu32_size,portMAX_DELAY);
   xSemaphoreGive(Semaphore_ExtFlashState);//确保没有占用信号量 释放互斥量 但好像不太用
   while(1){
+    /*这里要从YmodeC里面接收两次：
+    第一次接收的是文件大小，也包含文件名。
+    第二次接收的是每帧的数据针头地址*/
     xQueueReceive(Queue_AppDataBuffer,&pu8_data,portMAX_DELAY);//这里是pack data
                                                               //
     xSemaphoreTake(Semaphore_ExtFlashState, 0);//
@@ -225,7 +229,8 @@ void DownloadAppData_task(void *argument){
     //TODO Add
     //写入外部flash
     //外部声明的变量packet_length
-    W25Q64_WriteData(pu8_data,(uint32_t)packet_length);//数据长度转换下
+    // W25Q64_WriteData(pu8_data,(uint32_t)packet_length);//数据长度转换下
+    W25Q64_WriteData(pu8_data,g_u32_datalength);//数据长度转换下
     xSemaphoreGive(Semaphore_ExtFlashState);
   }
 }

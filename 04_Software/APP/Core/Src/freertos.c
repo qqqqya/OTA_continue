@@ -159,7 +159,10 @@ void StartDefaultTask(void *argument)
   * @retval None
   */
 void HAL_UARTEx_RxEventCallback(UART_HandleTypeDef *huart,uint16_t Size)
-{
+{/**HAL_UART_IRQHandler判断无误之后会调用用户回调函数   HAL_UARTEx_RxEventCallback
+
+  HAL_UART_Receive_IT()启动中断
+void USART1_IRQHandler(void)  HAL_UART_IRQHandler(&huart1);  会自动调用HAL_UART_IRQHandler() */
     UNUSED(huart);
   UNUSED(Size);
   BaseType_t  xHigherPriorityTaskWoken = pdFALSE;

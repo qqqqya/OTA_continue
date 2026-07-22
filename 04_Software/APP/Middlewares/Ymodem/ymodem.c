@@ -196,7 +196,9 @@ int32_t Ymodem_Receive (uint8_t *buf1,uint8_t *buf2)
                     //通知，不做任何处理
                     int32_t * pu32_size = &size;///这里传的地址之后还要取地址？二级指针？
                     xQueueSend(Queue_AppDataBuffer,&pu32_size,0);//队列是指针 W25q的扇区，根据size的大小决定
-                      if(packet_data == buf1)//切换buf
+                    /** @起始帧传输文件名和文件大小，文件大小通过队列发送到其他任务中。
+                     * 队列是一个通信对象，在这里也得切换buf;为后续的数据帧切换切换buf1和buf2  */
+                    if(packet_data == buf1)//切换buf
                     {
                       packet_data = buf2;//接收数据的局部变量如果是buf1 则切换到buf2
                     }

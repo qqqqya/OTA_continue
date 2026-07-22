@@ -98,6 +98,7 @@ int main(void)
   MX_USART1_UART_Init();
   MX_SPI1_Init();
   /* USER CODE BEGIN 2 */
+  HAL_Delay(100);
   ee_CheckOk();//检查eeprom是否正常工作
   W25Qx_Init();
 	// printf("Hello app!\r\n");
