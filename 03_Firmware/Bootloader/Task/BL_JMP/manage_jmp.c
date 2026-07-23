@@ -174,12 +174,12 @@ int8_t ExA_To_ExB_AES(int32_t fl_size){
     u8 Temp[16];  //原密文数据缓存
     u16 readTime=0,readDataCount=0;   //读取数据再解密的次数（每次解密16个字节）
     u32 AppSize=0;  //升级包的大小
-    //u32 FlashDestination=ApplicationAddress;
+
     u16 Read_Memory_Size=0;
     u32 Read_Memory_index=0;
     uint8_t *pu8_IV_IN_OUT = IV;
     uint8_t *pu8_key256bit = Key;
-
+    //u32 FlashDestination=ApplicationAddress;
     if(fl_size <= 0)
     {
       return -1;
@@ -215,16 +215,16 @@ int8_t ExA_To_ExB_AES(int32_t fl_size){
     }
 
     //数据帧
-    //擦除外部flash比较耗时--这里先不擦出、对于A区在擦除
+    //擦除外部flash比较耗时--这里先不擦出--------实际上对于外部flash在写入的时候就会进行擦除了
         // uint8_t flash_erase_state = Flash_erase(AppRunFlashDestination,AppSize);
 
       for(readTime=0;readTime<readDataCount;readTime++)
       {
-        //判断下当前buffer下的数据是否读取完毕
+        //判断下当前buffer下的数据是否读取完毕--Read memory size在读取函数中会被函数修改为4K
         if(Read_Memory_index == Read_Memory_Size)
         {
           if(2 == W25Q64_ReadData(BLOCK_1,Mem_Read_buffer,&Read_Memory_Size))
-          {//2:读取失败  0:读取成功  1:读取成功
+          {//2:读取失败  0:读取成功  1:读取完毕，没有数据了
             return -1;
           }
           Read_Memory_index = 0;
@@ -250,7 +250,7 @@ int8_t ExA_To_ExB_AES(int32_t fl_size){
 }
 /**
  * @brief 将当前的APP程序 到exflash A区--为了回滚使用
- * 
+ * File size表示从EEPROM里面读出的APP写入的数据大小
  * @param fl_size 
  */
 int8_t App_To_ExA(int32_t fl_size){
@@ -261,8 +261,9 @@ int8_t App_To_ExA(int32_t fl_size){
   {//appsize 在ymodemn.c中已经解析出来了
     return -1;
   }
-  Erase_Flash_Block(BLOCK_1);//擦除A区--只是清除结构体
-  W25Q64_WriteData(BLOCK_1,(u8 *)flash_des,fl_size);//将当前的APP程序搬运到外部flash A区
+  Erase_Flash_Block(BLOCK_1);//擦除A区--只是清除结构体---
+  //真正清除A区的数据的操作是在write data, 里面会通过写spi指令和24位地址来进行擦除
+  W25Q64_WriteData(BLOCK_1,(u32 *)flash_des,fl_size);//将当前的APP程序搬运到外部flash A区
   W25Q64_WriteData_End(BLOCK_1);
   
   return 0;

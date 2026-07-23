@@ -58,6 +58,10 @@ void ota_task_runnable(void *argument)
   uint8_t t_u8_otastate = 0x00;
   /*清除eeprom的OTA状态--没有更新--在00地址 写入0x00*/
   ee_WriteBytes(&t_u8_otastate,0x00,1);
+
+  /**TODO: 应当在这里去将当前运行的APP的大的大小写入0X05的单元地址
+   * 但是这个大小如何获取呢？很奇怪，我感觉可能是应该在boot工程中去把这个大小得出来
+   */
   while (1)
   {
     switch(g_Ota_State){  //==请求下载，下载，请求升级，结束==
