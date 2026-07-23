@@ -55,11 +55,22 @@ uint8_t Key_Scan(void)
         if(GPIO_ReadInputDataBit(GPIOA, GPIO_Pin_0) == Bit_RESET)
         {
             // 等待按键松开（防止一直触发）
-            while(GPIO_ReadInputDataBit(GPIOA, GPIO_Pin_0) == Bit_RESET);
+            // while(GPIO_ReadInputDataBit(GPIOA, GPIO_Pin_0) == Bit_RESET);
+            uint32_t timeout = 100000;
+while(GPIO_ReadInputDataBit(GPIOA, GPIO_Pin_0) == Bit_RESET && --timeout);
             return 1;
         }
     }
     return 0;
+//     if(GPIO_ReadInputDataBit(GPIOA, GPIO_Pin_0) == Bit_RESET)
+// {
+//     Delay(50);   // 只是延时消抖
+//     if(GPIO_ReadInputDataBit(GPIOA, GPIO_Pin_0) == Bit_RESET)
+//     {
+//         return 1;  // 直接返回1，不等松手
+//     }
+// }
+// return 0;
 //    if(GPIO_ReadInputDataBit(GPIOA,GPIO_Pin_0) == Bit_RESET)
 //    {
 //      Delay(50);////////致命阻塞

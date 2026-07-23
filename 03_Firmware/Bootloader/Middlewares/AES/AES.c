@@ -485,7 +485,7 @@ void Aes_IV_key256bit_Encrypt(unsigned char *IV_IN_OUT, unsigned char *State_IN_
 	}
 }
 
-//AES解密  16字节一个数据块
+//AES解密  16字节一个数据块 通过向量-密文-密钥-解密得到明文
 //IV_IN_OUT:        向量输入  原密文输出
 //State_IN_OUT：    密文输入  明文输出
 //key256bit:        秘钥  256bit  32字节

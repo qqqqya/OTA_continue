@@ -63,9 +63,9 @@ void SPI1_Init(void)
     GPIO_InitStructure.GPIO_Speed=GPIO_Speed_100MHz;
     GPIO_Init(GPIOA,&GPIO_InitStructure);
     
-    GPIO_PinAFConfig(GPIOA,GPIO_PinSource5,GPIO_AF_SPI1);  //PA5复用为SPI1
-    GPIO_PinAFConfig(GPIOA,GPIO_PinSource6,GPIO_AF_SPI1);  //PA6复用为SPI1
-    GPIO_PinAFConfig(GPIOA,GPIO_PinSource7,GPIO_AF_SPI1);  //PA7复用为SPI1
+    GPIO_PinAFConfig(GPIOA,GPIO_PinSource5,GPIO_AF_SPI1);  //PA5复用为SPI1  SCK
+    GPIO_PinAFConfig(GPIOA,GPIO_PinSource6,GPIO_AF_SPI1);  //PA6复用为SPI1  DO
+    GPIO_PinAFConfig(GPIOA,GPIO_PinSource7,GPIO_AF_SPI1);  //PA7复用为SPI1  DI
     
     RCC_APB2PeriphResetCmd(RCC_APB2Periph_SPI1,ENABLE);  //复位SPI1
     RCC_APB2PeriphResetCmd(RCC_APB2Periph_SPI1,DISABLE);  //停止复位SPI1
@@ -122,7 +122,13 @@ u8 SPI1_ReadWriteByte(u8 WriteData)
     //RXNE是用来判断接收缓存区是否为空的状态位，其状态位标志和TXE相同
     return SPI_I2S_ReceiveData(SPI1); //返回通过SPI接收的数据
 }
-
+/**
+ * @brief SPI1写入数据
+ * @param WriteData:要写入的字节
+ * @param dataSize:数据大小
+ * @param timeout:超时时间
+ * @return u8:0-成功 1-失败
+ */
 u8 SPI1_WriteByte(u8 *WriteData, u16 dataSize, u32 timeout)
 {
     u32 time = timeout;
@@ -135,18 +141,20 @@ u8 SPI1_WriteByte(u8 *WriteData, u16 dataSize, u32 timeout)
     {
         if((SPI_I2S_GetFlagStatus(SPI1,SPI_I2S_FLAG_TXE) !=RESET) && (txsize > 0) && (txflow==1))
         {
-            SPI_I2S_SendData(SPI1,*pTxBuffPtr);
-            pTxBuffPtr += sizeof(u8);
-            txsize--;
+            SPI_I2S_SendData(SPI1, *pTxBuffPtr); // 把数据写入DR，硬件自动发送
+            pTxBuffPtr += sizeof(u8);            // 指针后移，准备下一个数据
+            txsize--;                             // 剩余发送数减1
             txflow = 0;
         }
+
+        // 2. 接收逻辑：当接收缓冲区有数据，且还有数据要收
         if((SPI_I2S_GetFlagStatus(SPI1,SPI_I2S_FLAG_RXNE) !=RESET) && (rxsize > 0) && (txflow==0))
         {
-            SPI_I2S_ReceiveData(SPI1);
-            rxsize--;
+            SPI_I2S_ReceiveData(SPI1); // 读取DR里收到的数据（这里没存，只清空了缓冲区）
+            rxsize--;                  // 剩余接收数减1
             txflow = 1;
         }
-        if ((SysTickUptime - current_time) >= time )
+        if ((SysTickUptime - current_time) >= time )//超时
         {
             SPI_I2S_ClearFlag(SPI1,SPI_I2S_FLAG_OVR);
             return 0;

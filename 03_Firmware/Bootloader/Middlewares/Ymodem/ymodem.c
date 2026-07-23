@@ -234,8 +234,9 @@ int32_t Ymodem_Receive (uint8_t *buf)
                 {   /* write data to flash */
 
                       memcpy(buf_ptr, packet_data + PACKET_HEADER, packet_length);
-                      W25Q64_WriteData(buf_ptr, packet_length); // 将数据写入外部flash
-                  ///原来写入内部flash  写入的就不需要了
+                      W25Q64_WriteData(BLOCK_1,buf_ptr, packet_length); // 将数据写入外部flash
+
+                  ///原来写入片上flash ----偏上方是写入如下，但是我们现在用外部flash  写入的就不需要了
                       // RamSource = (uint32_t)buf;
                       // for (j = 0;(j < packet_length) && (FlashDestination < BackupApplicationAddress + size);j += 4)
                       // {
@@ -288,7 +289,7 @@ int32_t Ymodem_Receive (uint8_t *buf)
       break;
     }
   }
-  W25Q64_WriteData_End();
+  W25Q64_WriteData_End(BLOCK_1);
   return (int32_t)size;
 }
 

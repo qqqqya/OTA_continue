@@ -1,0 +1,627 @@
+{
+    "Session": "default",
+    "Sessions": {
+        "default": {
+            "SessionData": {
+                "2_1920x1080_1707x1067": {
+                    "AnalysisLog": {
+                        "Dock Area": 8,
+                        "Dock In Drawer Mode": false,
+                        "Dock Is Floating": false,
+                        "Dock Tab Group": [
+                            "SearchResultsWindow"
+                        ]
+                    },
+                    "DependencyBrowserWidget2_0": {
+                        "Dock Area": 8,
+                        "Dock In Drawer Mode": false,
+                        "Dock Is Floating": false,
+                        "Dock Tab Group": [
+                        ]
+                    },
+                    "DockWidgets": {
+                        "FloatingWidgetOrder": [
+                        ],
+                        "OpenWindows": {
+                            "00ProjectOverviewWidget": {
+                                "height": 436,
+                                "width": 250
+                            },
+                            "01SuggestionsBrowser": {
+                                "height": 919,
+                                "width": 250
+                            },
+                            "02EntityFilter": {
+                                "height": 459,
+                                "width": 250
+                            },
+                            "03Selector": {
+                                "height": 459,
+                                "width": 250
+                            },
+                            "04InfoBrowserWidget_0": {
+                                "height": 456,
+                                "width": 270
+                            }
+                        },
+                        "TabGroupFrontWidgets": [
+                            "ProjectOverviewWidget"
+                        ]
+                    },
+                    "EntityFilter": {
+                        "Dock Area": 1,
+                        "Dock In Drawer Mode": false,
+                        "Dock Is Floating": false,
+                        "Dock Tab Group": [
+                            "ProjectOverviewWidget",
+                            "Selector"
+                        ]
+                    },
+                    "FindInFiles": {
+                        "Dock Area": 1,
+                        "Dock In Drawer Mode": false,
+                        "Dock Is Floating": true,
+                        "Dock Position": {
+                            "x": 1275,
+                            "y": 378
+                        },
+                        "Dock Size": {
+                            "height": 409,
+                            "width": 311
+                        },
+                        "Dock Tab Group": [
+                        ]
+                    },
+                    "InfoBrowserWidget_0": {
+                        "Dock Area": 1,
+                        "Dock In Drawer Mode": false,
+                        "Dock Is Floating": false,
+                        "Dock Tab Group": [
+                        ]
+                    },
+                    "IssueBrowser": {
+                        "Dock Area": 8,
+                        "Dock In Drawer Mode": false,
+                        "Dock Is Floating": false,
+                        "Dock Tab Group": [
+                        ]
+                    },
+                    "ProjectOverviewWidget": {
+                        "Dock Area": 1,
+                        "Dock In Drawer Mode": false,
+                        "Dock Is Floating": false,
+                        "Dock Tab Group": [
+                            "EntityFilter",
+                            "Selector"
+                        ]
+                    },
+                    "SearchResultsWindow": {
+                        "Dock Area": 8,
+                        "Dock In Drawer Mode": false,
+                        "Dock Is Floating": false,
+                        "Dock Tab Group": [
+                        ]
+                    },
+                    "Selector": {
+                        "Dock Area": 1,
+                        "Dock In Drawer Mode": false,
+                        "Dock Is Floating": false,
+                        "Dock Tab Group": [
+                            "ProjectOverviewWidget",
+                            "EntityFilter"
+                        ]
+                    },
+                    "SuggestionsBrowser": {
+                        "Dock Area": 2,
+                        "Dock In Drawer Mode": false,
+                        "Dock Is Floating": false,
+                        "Dock Tab Group": [
+                        ]
+                    }
+                },
+                "DependencyBrowserWidget_0": {
+                    "CurrentSelection": "@lReceive_Packet@p@l./Middlewares/Ymodem/ymodem.c",
+                    "SplitterState": "AAAA/wAAAAEAAAACAAABAAAAAQAB/////wEAAAABAA=="
+                },
+                "EditorWindowList": [
+                    "./Middlewares/Ymodem/ymodem.c",
+                    "./Core/Src/main.c",
+                    "./Task/BL_JMP/manage_jmp.c",
+                    "./Bsp/W25Qxx/w25qxx.c",
+                    "./Bsp/W25Qxx/w25qxx_Handler.c"
+                ],
+                "EditorWindowSetting": {
+                    "0ca2705fc368f47738a4c81689987ce9": {
+                        "anchor": {
+                            "line": 59,
+                            "offset": 3
+                        },
+                        "caret": {
+                            "line": 59,
+                            "offset": 19
+                        },
+                        "container": 1,
+                        "height": 755,
+                        "hscroll": 0,
+                        "isMaximized": false,
+                        "vscroll": 47,
+                        "width": 1206,
+                        "x": 0,
+                        "y": 0
+                    },
+                    "2b5dd6bba5ff306bc200db625c0ccc21": {
+                        "anchor": {
+                            "line": 64,
+                            "offset": 8
+                        },
+                        "caret": {
+                            "line": 64,
+                            "offset": 22
+                        },
+                        "container": 1,
+                        "height": 651,
+                        "hscroll": 0,
+                        "isMaximized": false,
+                        "vscroll": 35,
+                        "width": 1392,
+                        "x": 0,
+                        "y": 0
+                    },
+                    "37eeb92fb29be5120e063b3721af2a88": {
+                        "anchor": {
+                            "line": 831,
+                            "offset": 5
+                        },
+                        "caret": {
+                            "line": 831,
+                            "offset": 21
+                        },
+                        "container": 1,
+                        "height": 755,
+                        "hscroll": 0,
+                        "isMaximized": false,
+                        "vscroll": 817,
+                        "width": 1206,
+                        "x": 0,
+                        "y": 0
+                    },
+                    "3effd989bc7a9ad3ad2e7f3a5a322b53": {
+                        "anchor": {
+                            "line": 236,
+                            "offset": 22
+                        },
+                        "caret": {
+                            "line": 236,
+                            "offset": 38
+                        },
+                        "container": 1,
+                        "height": 651,
+                        "hscroll": 0,
+                        "isMaximized": false,
+                        "vscroll": 202,
+                        "width": 1392,
+                        "x": 0,
+                        "y": 0
+                    },
+                    "44aadf18b8b883b64908604f28bb3d72": {
+                        "anchor": {
+                            "line": 86,
+                            "offset": 21
+                        },
+                        "caret": {
+                            "line": 86,
+                            "offset": 21
+                        },
+                        "container": 1,
+                        "height": 651,
+                        "hscroll": 0,
+                        "isMaximized": false,
+                        "vscroll": 60,
+                        "width": 1392,
+                        "x": 0,
+                        "y": 0
+                    },
+                    "45ea304f663284fa89431f5de0528431": {
+                        "anchor": {
+                            "line": 44,
+                            "offset": 7
+                        },
+                        "caret": {
+                            "line": 44,
+                            "offset": 30
+                        },
+                        "container": 1,
+                        "height": 651,
+                        "hscroll": 0,
+                        "isMaximized": false,
+                        "vscroll": 33,
+                        "width": 1392,
+                        "x": 0,
+                        "y": 0
+                    },
+                    "70ab4217772ca2ff5dd2301441f0118e": {
+                        "anchor": {
+                            "line": 311,
+                            "offset": 1
+                        },
+                        "caret": {
+                            "line": 311,
+                            "offset": 15
+                        },
+                        "container": 1,
+                        "height": 755,
+                        "hscroll": 0,
+                        "isMaximized": false,
+                        "vscroll": 280,
+                        "width": 1206,
+                        "x": 0,
+                        "y": 0
+                    },
+                    "f2e9b3668520e482752b64418fb95f59": {
+                        "anchor": {
+                            "line": 137,
+                            "offset": 32
+                        },
+                        "caret": {
+                            "line": 137,
+                            "offset": 32
+                        },
+                        "container": 1,
+                        "height": 755,
+                        "hscroll": 0,
+                        "isMaximized": false,
+                        "vscroll": 119,
+                        "width": 1206,
+                        "x": 0,
+                        "y": 0
+                    }
+                },
+                "EntityFilter": {
+                    "LastEntityFilterUsed": "All Entities"
+                },
+                "GraphCustomizerTemporarySets": {
+                    "11": {
+                        "Control Flow": {
+                            "Type=Entity ID=@lW25Qx_Write@kW25Qx_Write@f.#SLASH#Bsp#SLASH#W25Qxx#SLASH#w25qxx.c": {
+                                "11": {
+                                    "CreatedOn": "2026-05-18",
+                                    "FormatVersion": 1,
+                                    "GraphStyle": "Classic",
+                                    "HideUnhighlightedNodes": 0,
+                                    "IdNodeOpts": {
+                                        "@lW25Qx_Write@kW25Qx_Write@f.#SLASH#Bsp#SLASH#W25Qxx#SLASH#w25qxx.c - 24": 1,
+                                        "@lW25Qx_Write@kW25Qx_Write@f.#SLASH#Bsp#SLASH#W25Qxx#SLASH#w25qxx.c - 25": 1,
+                                        "@lW25Qx_Write@kW25Qx_Write@f.#SLASH#Bsp#SLASH#W25Qxx#SLASH#w25qxx.c - 26": 1,
+                                        "@lW25Qx_Write@kW25Qx_Write@f.#SLASH#Bsp#SLASH#W25Qxx#SLASH#w25qxx.c - 27": 1,
+                                        "@lW25Qx_Write@kW25Qx_Write@f.#SLASH#Bsp#SLASH#W25Qxx#SLASH#w25qxx.c - 28": 1,
+                                        "@lW25Qx_Write@kW25Qx_Write@f.#SLASH#Bsp#SLASH#W25Qxx#SLASH#w25qxx.c - 29": 1,
+                                        "@lW25Qx_Write@kW25Qx_Write@f.#SLASH#Bsp#SLASH#W25Qxx#SLASH#w25qxx.c - 30": 1,
+                                        "@lW25Qx_Write@kW25Qx_Write@f.#SLASH#Bsp#SLASH#W25Qxx#SLASH#w25qxx.c - 31": 1,
+                                        "@lW25Qx_Write@kW25Qx_Write@f.#SLASH#Bsp#SLASH#W25Qxx#SLASH#w25qxx.c - 32": 1,
+                                        "@lW25Qx_Write@kW25Qx_Write@f.#SLASH#Bsp#SLASH#W25Qxx#SLASH#w25qxx.c - 33": 1,
+                                        "@lW25Qx_Write@kW25Qx_Write@f.#SLASH#Bsp#SLASH#W25Qxx#SLASH#w25qxx.c - 34": 1,
+                                        "@lW25Qx_Write@kW25Qx_Write@f.#SLASH#Bsp#SLASH#W25Qxx#SLASH#w25qxx.c - 35": 1
+                                    },
+                                    "LastModifiedOn": "2026-05-18",
+                                    "Theme": "STI_CONTROL_FLOW",
+                                    "graphdisplay_center_x": 471.24075924075925,
+                                    "graphdisplay_center_y": 432.75824175824175,
+                                    "graphdisplay_overview_x": 0,
+                                    "graphdisplay_overview_y": 0,
+                                    "graphdisplay_zoom": 110,
+                                    "graphwindow_fitheight": false,
+                                    "graphwindow_fitwidth": false,
+                                    "graphwindow_radar": true,
+                                    "graphwindow_reuse": false,
+                                    "graphwindow_sync": false,
+                                    "window": {
+                                        "2_1920x1080_1707x1067": {
+                                            "container": 1,
+                                            "height": 755,
+                                            "isMaximized": false,
+                                            "width": 1206,
+                                            "x": 0,
+                                            "y": 0
+                                        }
+                                    }
+                                },
+                                "GraphRootName": "W25Qx_Write"
+                            }
+                        }
+                    },
+                    "12": {
+                        "Butterfly": {
+                            "Type=Entity ID=@lW25Qx_Write@kW25Qx_Write@f.#SLASH#Bsp#SLASH#W25Qxx#SLASH#w25qxx.c": {
+                                "12": {
+                                    "CreatedOn": "2026-05-18",
+                                    "EntNodeOpts": {
+                                        "@lDelay@kDelay@f.#SLASH#Core#SLASH#Src#SLASH#main.c": 1280,
+                                        "@lW25Q64_WriteData@kW25Q64_WriteData@f.#SLASH#Bsp#SLASH#W25Qxx#SLASH#w25qxx_Handler.c": 2176,
+                                        "@lW25Q64_WriteData_End@kW25Q64_WriteData_End@f.#SLASH#Bsp#SLASH#W25Qxx#SLASH#w25qxx_Handler.c": 133248,
+                                        "@lW25Qx_Write@kW25Qx_Write@f.#SLASH#Bsp#SLASH#W25Qxx#SLASH#w25qxx.c": 396672,
+                                        "@lW25Qx_WriteEnable@kW25Qx_WriteEnable@f.#SLASH#Bsp#SLASH#W25Qxx#SLASH#w25qxx.c": 263424,
+                                        "@lYmodem_Receive@kYmodem_Receive@f.#SLASH#Middlewares#SLASH#Ymodem#SLASH#ymodem.c": 2176,
+                                        "@lYmodem_Receive@kYmodem_Receive@f.#SLASH#Middlewares#SLASH#Ymodem#SLASH#ymodem_ref.c": 2176
+                                    },
+                                    "FormatVersion": 1,
+                                    "GraphStyle": "Calls && Called By (Simplified)",
+                                    "HideUnhighlightedEdges": 0,
+                                    "HideUnhighlightedNodes": 0,
+                                    "LastModifiedOn": "2026-05-18",
+                                    "Theme": "STI_CALLS",
+                                    "graphdisplay_center_x": 492,
+                                    "graphdisplay_center_y": 58,
+                                    "graphdisplay_overview_x": 0,
+                                    "graphdisplay_overview_y": 0,
+                                    "graphdisplay_zoom": 100,
+                                    "graphwindow_fitheight": false,
+                                    "graphwindow_fitwidth": false,
+                                    "graphwindow_radar": true,
+                                    "graphwindow_reuse": false,
+                                    "graphwindow_sync": false,
+                                    "window": {
+                                        "2_1920x1080_1707x1067": {
+                                            "container": 1,
+                                            "height": 755,
+                                            "isMaximized": false,
+                                            "width": 1206,
+                                            "x": 0,
+                                            "y": 0
+                                        }
+                                    }
+                                },
+                                "GraphRootName": "W25Qx_Write"
+                            }
+                        }
+                    },
+                    "13": {
+                        "Butterfly": {
+                            "Type=Entity ID=@lYmodem_Receive@kYmodem_Receive@f.#SLASH#Middlewares#SLASH#Ymodem#SLASH#ymodem.c": {
+                                "13": {
+                                    "CreatedOn": "2026-05-18",
+                                    "FormatVersion": 1,
+                                    "GraphStyle": "Classic",
+                                    "LastModifiedOn": "2026-05-18",
+                                    "graphdisplay_center_x": 342.00000000000006,
+                                    "graphdisplay_center_y": 31.810245310245335,
+                                    "graphdisplay_overview_x": 10,
+                                    "graphdisplay_overview_y": 10,
+                                    "graphdisplay_zoom": 180,
+                                    "graphwindow_fitheight": false,
+                                    "graphwindow_fitwidth": false,
+                                    "graphwindow_radar": true,
+                                    "graphwindow_reuse": false,
+                                    "graphwindow_sync": false,
+                                    "window": {
+                                        "2_1920x1080_1707x1067": {
+                                            "container": 1,
+                                            "height": 651,
+                                            "isMaximized": false,
+                                            "width": 1392,
+                                            "x": 0,
+                                            "y": 0
+                                        }
+                                    }
+                                },
+                                "GraphRootName": "Ymodem_Receive"
+                            }
+                        }
+                    },
+                    "14": {
+                        "Butterfly": {
+                            "Type=Entity ID=@lExternal_AES_Backup2App@kExternal_AES_Backup2App@f.#SLASH#Task#SLASH#BL_JMP#SLASH#manage_jmp.c": {
+                                "14": {
+                                    "CreatedOn": "2026-05-18",
+                                    "FormatVersion": 1,
+                                    "GraphStyle": "Classic",
+                                    "LastModifiedOn": "2026-05-18",
+                                    "graphdisplay_center_x": 91,
+                                    "graphdisplay_center_y": 56,
+                                    "graphdisplay_overview_x": 10,
+                                    "graphdisplay_overview_y": 10,
+                                    "graphdisplay_zoom": 100,
+                                    "graphwindow_fitheight": false,
+                                    "graphwindow_fitwidth": false,
+                                    "graphwindow_radar": true,
+                                    "graphwindow_reuse": false,
+                                    "graphwindow_sync": false,
+                                    "window": {
+                                        "2_1920x1080_1707x1067": {
+                                            "container": 1,
+                                            "height": 651,
+                                            "isMaximized": false,
+                                            "width": 1392,
+                                            "x": 0,
+                                            "y": 0
+                                        }
+                                    }
+                                },
+                                "GraphRootName": "External_AES_Backup2App"
+                            }
+                        }
+                    },
+                    "15": {
+                        "Control Flow": {
+                            "Type=Entity ID=@lW25Q64_WriteData@kW25Q64_WriteData@f.#SLASH#Bsp#SLASH#W25Qxx#SLASH#w25qxx_Handler.c": {
+                                "15": {
+                                    "CreatedOn": "2026-05-18",
+                                    "FormatVersion": 1,
+                                    "GraphStyle": "Classic",
+                                    "HideUnhighlightedNodes": 0,
+                                    "IdNodeOpts": {
+                                        "@lW25Q64_WriteData@kW25Q64_WriteData@f.#SLASH#Bsp#SLASH#W25Qxx#SLASH#w25qxx_Handler.c - 25": 1,
+                                        "@lW25Q64_WriteData@kW25Q64_WriteData@f.#SLASH#Bsp#SLASH#W25Qxx#SLASH#w25qxx_Handler.c - 26": 1,
+                                        "@lW25Q64_WriteData@kW25Q64_WriteData@f.#SLASH#Bsp#SLASH#W25Qxx#SLASH#w25qxx_Handler.c - 27": 1,
+                                        "@lW25Q64_WriteData@kW25Q64_WriteData@f.#SLASH#Bsp#SLASH#W25Qxx#SLASH#w25qxx_Handler.c - 28": 1,
+                                        "@lW25Q64_WriteData@kW25Q64_WriteData@f.#SLASH#Bsp#SLASH#W25Qxx#SLASH#w25qxx_Handler.c - 29": 1,
+                                        "@lW25Q64_WriteData@kW25Q64_WriteData@f.#SLASH#Bsp#SLASH#W25Qxx#SLASH#w25qxx_Handler.c - 30": 1
+                                    },
+                                    "LastModifiedOn": "2026-05-18",
+                                    "Theme": "STI_CONTROL_FLOW",
+                                    "customizer_splitter_state": "AAAA/wAAAAEAAAACAAAEggAAAN0B/////wEAAAABAA==",
+                                    "graphdisplay_center_x": 560.6428571428572,
+                                    "graphdisplay_center_y": 341.75829725829726,
+                                    "graphdisplay_overview_x": 10,
+                                    "graphdisplay_overview_y": 10,
+                                    "graphdisplay_zoom": 110,
+                                    "graphwindow_fitheight": false,
+                                    "graphwindow_fitwidth": false,
+                                    "graphwindow_radar": true,
+                                    "graphwindow_reuse": false,
+                                    "graphwindow_sync": false,
+                                    "window": {
+                                        "2_1920x1080_1707x1067": {
+                                            "container": 1,
+                                            "height": 919,
+                                            "isMaximized": false,
+                                            "width": 1392,
+                                            "x": 0,
+                                            "y": 0
+                                        }
+                                    }
+                                },
+                                "GraphRootName": "W25Q64_WriteData"
+                            }
+                        }
+                    }
+                },
+                "GraphWindowList": [
+                    "Graph:|:Unused:Control Flow:|:@lW25Q64_WriteData@kW25Q64_WriteData@f./Bsp/W25Qxx/w25qxx_Handler.c:|:15:|:Control Flow : W25Q64_WriteData",
+                    "Graph:|:Unused:Control Flow:|:@lW25Qx_Write@kW25Qx_Write@f./Bsp/W25Qxx/w25qxx.c:|:11:|:Control Flow : W25Qx_Write",
+                    "Graph:|:Unused:Butterfly:|:@lW25Qx_Write@kW25Qx_Write@f./Bsp/W25Qxx/w25qxx.c:|:12:|:Butterfly : W25Qx_Write",
+                    "Graph:|:Unused:Butterfly:|:@lYmodem_Receive@kYmodem_Receive@f./Middlewares/Ymodem/ymodem.c:|:13:|:Butterfly : Ymodem_Receive",
+                    "Graph:|:Unused:Butterfly:|:@lExternal_AES_Backup2App@kExternal_AES_Backup2App@f./Task/BL_JMP/manage_jmp.c:|:14:|:Butterfly : External_AES_Backup2App"
+                ],
+                "GraphicFilterSettings": {
+                    "Enabled": false
+                },
+                "IBExpansions": {
+                    "InfoBrowserWidget": [
+                        "Jovial References",
+                        "Python References",
+                        "WEB References",
+                        "WEB Possible References",
+                        "Asm References",
+                        "Ada References",
+                        "Ftn References",
+                        "VHDL References",
+                        "c# References",
+                        "C++ Called By",
+                        "C++ References",
+                        "Java References",
+                        "basic References",
+                        "Pascal References"
+                    ]
+                },
+                "IBOptions": {
+                },
+                "InfoBrowserWindowManager": {
+                    "InfoBrowserFileSyncInst": -1,
+                    "InfoBrowserSyncInst": [
+                        "0"
+                    ]
+                },
+                "LastAccessedPid": "15612",
+                "LastDisplayGroup": "2_1920x1080_1707x1067",
+                "MaintainEditorHistory": {
+                    "FileRanges": {
+                        "0": {
+                            "ColumnBegin": 5,
+                            "ColumnEnd": 21,
+                            "FilePath": "./Drivers/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_spi.c",
+                            "LineBegin": 832,
+                            "LineEnd": 832
+                        },
+                        "1": {
+                            "ColumnBegin": 3,
+                            "ColumnEnd": 19,
+                            "FilePath": "./Bsp/W25Qxx/w25qxx_Handler.c",
+                            "LineBegin": 60,
+                            "LineEnd": 60
+                        },
+                        "2": {
+                            "ColumnBegin": 8,
+                            "ColumnEnd": 22,
+                            "FilePath": "./Bsp/W25Qxx/w25qxx.c",
+                            "LineBegin": 312,
+                            "LineEnd": 312
+                        },
+                        "3": {
+                            "ColumnBegin": 32,
+                            "ColumnEnd": 32,
+                            "FilePath": "./Core/Src/Spi.c",
+                            "LineBegin": 138,
+                            "LineEnd": 138
+                        },
+                        "4": {
+                            "ColumnBegin": 5,
+                            "ColumnEnd": 21,
+                            "FilePath": "./Drivers/STM32F4xx_StdPeriph_Driver/src/stm32f4xx_spi.c",
+                            "LineBegin": 832,
+                            "LineEnd": 832
+                        },
+                        "5": {
+                            "ColumnBegin": 3,
+                            "ColumnEnd": 19,
+                            "FilePath": "./Bsp/W25Qxx/w25qxx_Handler.c",
+                            "LineBegin": 60,
+                            "LineEnd": 60
+                        },
+                        "size": 6
+                    },
+                    "index": 5
+                },
+                "MiscSaveStates": {
+                    "entitySelected": "@l.global@s.global@p@l./Drivers/CMSIS/Device/ST/STM32F4xx/Source/Templates/SW4STM32/startup_stm32f469_479xx.s",
+                    "ib": "entity:||:@lW25Q64_WriteData@kW25Q64_WriteData@f./Bsp/W25Qxx/w25qxx_Handler.c:||:Function W25Q64_WriteData",
+                    "projectOverviewCharts": "true",
+                    "projectOverviewChartsPosition": 1,
+                    "projectOverviewChartsSelected": "false",
+                    "projectOverviewChartsWorkspace": 0,
+                    "selection": "W25Q64_WriteData"
+                },
+                "ProjectUI": {
+                    "projectview": [
+                        "Core",
+                        "Core/Src",
+                        "Drivers",
+                        "Middlewares",
+                        "Middlewares/Ymodem",
+                        "Task",
+                        "Task/BL_JMP"
+                    ],
+                    "projectviewcuritem": "Middlewares/Ymodem/ymodem.c",
+                    "projectviewselection": [
+                        "Middlewares/Ymodem/ymodem.c"
+                    ]
+                },
+                "SplitWorkspace1SelectedTab": "Graph:|:Unused:Control Flow:|:@lW25Q64_WriteData@kW25Q64_WriteData@f./Bsp/W25Qxx/w25qxx_Handler.c:|:15:|:Control Flow : W25Q64_WriteData",
+                "SplitWorkspace1Tabs": [
+                    "./Core/Src/main.c",
+                    "./Task/BL_JMP/manage_jmp.c",
+                    "Graph:|:Unused:Butterfly:|:@lExternal_AES_Backup2App@kExternal_AES_Backup2App@f./Task/BL_JMP/manage_jmp.c:|:14:|:Butterfly : External_AES_Backup2App",
+                    "./Bsp/W25Qxx/w25qxx_Handler.c",
+                    "./Middlewares/Ymodem/ymodem.c",
+                    "Graph:|:Unused:Butterfly:|:@lYmodem_Receive@kYmodem_Receive@f./Middlewares/Ymodem/ymodem.c:|:13:|:Butterfly : Ymodem_Receive",
+                    "./Bsp/W25Qxx/w25qxx.c",
+                    "Graph:|:Unused:Butterfly:|:@lW25Qx_Write@kW25Qx_Write@f./Bsp/W25Qxx/w25qxx.c:|:12:|:Butterfly : W25Qx_Write",
+                    "Graph:|:Unused:Control Flow:|:@lW25Qx_Write@kW25Qx_Write@f./Bsp/W25Qxx/w25qxx.c:|:11:|:Control Flow : W25Qx_Write",
+                    "Graph:|:Unused:Control Flow:|:@lW25Q64_WriteData@kW25Q64_WriteData@f./Bsp/W25Qxx/w25qxx_Handler.c:|:15:|:Control Flow : W25Q64_WriteData"
+                ],
+                "SplittableWorkspace": {
+                    "active workspace": 0,
+                    "primary ws size": 1392,
+                    "split orientation": -1
+                },
+                "analysis": {
+                    "background": {
+                        "started": true
+                    }
+                },
+                "projectconfigure": {
+                    "last config panel": "C++"
+                }
+            }
+        }
+    }
+}

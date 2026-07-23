@@ -48,10 +48,17 @@ typedef struct
 /* Exported macro ------------------------------------------------------------*/
 #define EXTERN_Flash
 
+#define BLOCK_1         0
+#define BLOCK_2         1//这里的AB分区和APbuf那里类似，都是通过标志位去做index
+#define BLOCK_SIZE      0x10000//每个块的大小为64KB  0xFFFF
 /* Exported functions ------------------------------------------------------- */
 void W25Q64_Init(void);
 u8 W25Q64_EraseChip(void);
-u8 W25Q64_WriteData(u8 *data, u32 length);
-u8 W25Q64_WriteData_End(void);
-u8 W25Q64_ReadData(u8 *data, u16 *length);
+u8 Erase_Flash_Block(u8 block_index);
+uint32_t Read_BlockSize(u8 block_index);
+u8 W25Q64_SetBlockIndex(u8 block_index, u32 app_size);
+
+u8 W25Q64_WriteData(u8 block_index, u8 *data, u32 length);
+u8 W25Q64_WriteData_End(u8 block_index);
+u8 W25Q64_ReadData(u8 block_index, u8 *data, u16 *length);
 #endif /* __FLASH_H */

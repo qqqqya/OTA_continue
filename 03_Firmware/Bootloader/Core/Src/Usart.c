@@ -19,7 +19,9 @@
  * @version V1.0 2024-09-13
  *
  * @note 1 tab == 4 spaces!
- * 
+ * PA9为USART1_TX，PA10为USART1_RX
+ * PA9为USART1_TX，PA10为USART1_RX
+ * PA9为USART1_TX，PA10为USART1_RX
  *****************************************************************************/
 /* Includes ------------------------------------------------------------------*/
 #include "USART.h"
@@ -31,6 +33,31 @@
 /* Private functions ---------------------------------------------------------*/
 /* extern variables ---------------------------------------------------------*/
 
+// fputc 已注释，与示例工程一致。
+// JumpToApp() 在 RCC_DeInit() 之后调用 printf，若 fputc 存在则阻塞等待
+// USART_FLAG_TXE，而此时 APB2 时钟已从 48MHz 变为 16MHz，导致永久卡死。
+ #include <stdio.h>
+
+////禁用ARM半主机模式（核心！否则printf不生效）
+//#pragma import(__use_no_semihosting)
+//void _sys_exit(int x) { x = x; }
+//struct __FILE {
+//    int handle;
+//    // 不需要额外成员，�??小定义即可补全struct __FILE定义，让FILE变成完整类型
+//};
+//FILE __stdout; // 现在可以正常定义�??
+
+// #ifdef __GNUC__
+//     #define PUTCHAR_PROTOTYPE int _io_putchar(int ch)
+// #else
+//     #define PUTCHAR_PROTOTYPE int fputc(int ch, FILE *f)
+// #endif /* __GNUC__ */
+//PUTCHAR_PROTOTYPE
+// {
+//     USART_SendData(USART1, (uint8_t)ch);
+//     while (USART_GetFlagStatus(USART1, USART_FLAG_TXE) == RESET);
+//     return ch;
+// }
 /**
   * @brief  RCC配置初始化 USART1 USART2
   * @param  Null
@@ -46,7 +73,7 @@ static void RCC_Configuration(void) {
 /**
   * @brief  串口GPIO配置初始化 USART1 USART2
   *         GPIO使用Pin_Speed_50MHz，Pull_Up_Pull_Down_None
-  * @param  Null
+  * @param  Null 
   * @retval None
   */
 static void GPIO_Configuration(void) 
