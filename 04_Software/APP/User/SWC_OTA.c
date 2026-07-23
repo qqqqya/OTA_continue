@@ -121,6 +121,7 @@ void ota_task_runnable(void *argument)
 
                         //Test 
               uint8_t t_u8_readstate = 0;
+			  HAL_Delay(10);
               ee_ReadBytes(&t_u8_readstate,0x00,1);
               HAL_UART_Transmit(&huart1,&t_u8_readstate,1,1000);
                         //Test 
