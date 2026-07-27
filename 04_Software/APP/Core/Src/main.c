@@ -55,7 +55,7 @@
 void SystemClock_Config(void);
 void MX_FREERTOS_Init(void);
 /* USER CODE BEGIN PFP */
-
+extern void soft_reset(void);
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
@@ -100,6 +100,23 @@ int main(void)
   /* USER CODE BEGIN 2 */
   HAL_Delay(100);
   ee_CheckOk();//检查eeprom是否正常工作
+          //验证App自检标识
+        uint8_t eeflag = 255;
+        ee_ReadBytes(&eeflag,0x00,1);
+
+        if(0x44 == eeflag)
+        {
+          eeflag = 0x00;
+          ee_WriteBytes(&eeflag,0x00,1);
+          //等待看门狗主动复位
+          while(1);//等待6s看门狗复位
+        }
+        else if(0x00 != eeflag)
+        {
+          //主动执行复位
+          soft_reset();
+        }
+
   W25Qx_Init();
 	// printf("Hello app!\r\n");
 /* 

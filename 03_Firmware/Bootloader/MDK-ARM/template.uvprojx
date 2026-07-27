@@ -420,6 +420,11 @@
               <FileType>1</FileType>
               <FilePath>..\Core\Src\Spi.c</FilePath>
             </File>
+            <File>
+              <FileName>Iwdg.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Core\Src\Iwdg.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>

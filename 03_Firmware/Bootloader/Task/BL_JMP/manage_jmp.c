@@ -34,6 +34,7 @@
 #include "elog.h"
 #include "w25qxx_Handler.h"
 #include "ymodem.h"
+#include "iwdg.h"
 
 
 typedef void (*pFunc)(void);      //pFunc 是变量名'，类型是 void (*)(void)。
@@ -47,6 +48,17 @@ uint16_t app_size = 0;//APP程序大小
 
 uint8_t au8_test[1024]; //测试数据缓存
 
+/**
+ * @brief 标准库 软件复位单片机
+ * 
+ * @param None
+ * 
+ * @return: None
+ */
+void System_SoftwareReset(void)
+{
+  __NVIC_SystemReset();
+}
 ///向量--密钥  1(dec) 0x31(ascii)  2(dec) 0x32(ascii)
 unsigned char IV[16]={0x31,0X32,0x31,0X32,0x31,0X32,0x31,0X32,0x31,0X32,0x31,0X32,0x31,0X32,0x31,0X32};  
 unsigned char Key[32]={0x31,0X32,0x31,0X32,0x31,0X32,0x31,0X32,0x31,0X32,0x31,0X32,0x31,0X32,0x31,0X32,\
@@ -54,12 +66,12 @@ unsigned char Key[32]={0x31,0X32,0x31,0X32,0x31,0X32,0x31,0X32,0x31,0X32,0x31,0X
 u8  Mem_Read_buffer[4096];//读4k  外部flash读数据缓存
 
 void Ota_statemanage(void){
-  uint8_t ota_status = NO_APP_UPDATE;//OTA状态
+  uint8_t t_u8_otastate = NO_APP_UPDATE;//OTA状态
   int32_t fil_size = 0;//文件大小
   uint32_t t_u32_appsize = 0;//APP程序大小
 
-  ee_ReadBytes(&ota_status,0x00,1);//读取OTA状态字节
-  switch(ota_status)
+  ee_ReadBytes(&t_u8_otastate,0x00,1);//读取OTA状态字节
+  switch(t_u8_otastate)
   {
     case NO_APP_UPDATE://没有更新的情况下，如果按下就重新拷贝，如果没按下就直接跳转APP程序
       if(Key_Scan())//通常情况下，都是直接跳转APP程序
@@ -74,26 +86,44 @@ void Ota_statemanage(void){
           App_To_ExA(t_u32_appsize);//0X05存的是当前APP字节大小
         /*4.exflash B区的解密后数据加载到片上flash*/
           ExB_To_App();
-        /*5.跳转APP程序*/
-          Jump2App();
-    //这里其实就是如果跳转不成功，就将上一次备份的能运行的程序再一次的拷贝回片上flash中
-          // /*6.如果运行到这一步，说明数据无效，把外部A区的数据搬运到App中*/
-          ExA_To_App();
-          /*再执行一次跳转*/
-          Jump2App();
+
+            /* 不直接进行跳转 而是清除外部状态码 修改软件状态机 复位--运行到其他分支*/
+            t_u8_otastate = APP_FIRST_CHECK_START;
+            ee_WriteBytes(&t_u8_otastate,0x00,1);
+
+            System_SoftwareReset();//复位
+    //     /*5.跳转APP程序*/
+    //       Jump2App();
+    // //这里其实就是如果跳转不成功，就将上一次备份的能运行的程序再一次的拷贝回片上flash中
+    //       // /*6.如果运行到这一步，说明数据无效，把外部A区的数据搬运到App中*/
+    //       ExA_To_App();
+    //       /*再执行一次跳转*/
+    //       Jump2App();
         }
         else
         {
           //解密不成功，直接跳转APP程序，不进行其他操作
-          log_e("Download Failed!");
+          log_a("Boot dowload failed");
           Jump2App();
+              /*·初始化内部外部状态机*/
+              t_u8_otastate = NO_APP_UPDATE;
+              ee_WriteBytes(&t_u8_otastate,0x00,1);
+              /*软件复位*/
+              System_SoftwareReset();
         }
-      }
+      }/// end if(Key_Scan())
       else
       {
-        Jump2App();//KEY_Scan() 没有按下，直接跳转APP程序
-      }
-      break;
+              /*·初始化内部外部状态机*/
+              t_u8_otastate = NO_APP_UPDATE;
+              ee_WriteBytes(&t_u8_otastate,0x00,1);
+         Jump2App();//KEY_Scan() 没有按下，直接跳转APP程序
+              /*软件复位*/
+              System_SoftwareReset();
+     }
+    break;
+
+
     case APP_DOWNLOADING://0x11--EEPROM--说明，只是进行了协议握手，但是没有传输成功文件
       log_a("App dowload failed");//1、如果下载不成功的话，就会卡在11这个状态码上
       Jump2App();                 //说明是APP工程，下载的时候变失败
@@ -102,26 +132,31 @@ void Ota_statemanage(void){
       所以大多数情况下都只是上面的这两句，下面的这些会很少触发*/
       //3、接收数据，然后后面进行跳转
       fil_size = Ymodem_Receive(au8_test);
-       if(0 == ExA_To_ExB_AES(fil_size))
+      if(0 == ExA_To_ExB_AES(fil_size))
         {
         /*3.拷贝当前的APP程序 到exflash A区--为了回滚使用*/
           ee_ReadBytes((uint8_t *)&t_u32_appsize,0x05,4);//app程序大小
           App_To_ExA(t_u32_appsize);//0X05存的是当前APP字节大小
         /*4.exflash B区的解密后数据加载到片上flash*/
           ExB_To_App();
-        /*5.跳转APP程序*/
-          Jump2App();
-    //这里其实就是如果跳转不成功，就将上一次备份的能运行的程序再一次的拷贝回片上flash中
-          // /*6.如果运行到这一步，说明数据无效，把外部A区的数据搬运到App中*/
-          ExA_To_App();
-          /*再执行一次跳转*/
-          Jump2App();
+
+            /* 清除外部状态码 修改软件状态机 复位--运行到其他分支*/
+            t_u8_otastate = APP_FIRST_CHECK_START;
+            ee_WriteBytes(&t_u8_otastate,0x00,1);
+
+            System_SoftwareReset();//复位
         }
         else
         {
           //解密不成功，直接跳转APP程序，不进行其他操作
           log_e("Download Failed!");
+              /*·初始化内部外部状态机*/
+              t_u8_otastate = NO_APP_UPDATE;
+              ee_WriteBytes(&t_u8_otastate,0x00,1);
+          ///
           Jump2App();
+              /*软件复位*/
+              System_SoftwareReset();
         }
       break;
 
@@ -141,27 +176,55 @@ void Ota_statemanage(void){
           App_To_ExA(t_u32_appsize);              //0X05存的是当前APP字节大小
         /*4.exflash B区的解密后数据加载到片上flash*/
           ExB_To_App();
-        /*5.跳转APP程序*/
-          Jump2App();
-    //这里其实就是如果跳转不成功，就将上一次备份的能运行的程序再一次的拷贝回片上flash中
-          // /*6.如果运行到这一步，说明数据无效，把外部A区的数据搬运到App中*/
-          ExA_To_App();
-          /*再执行一次跳转*/
-          Jump2App();
+
+            /* 清除外部状态码 修改软件状态机 复位--运行到其他分支*/
+            t_u8_otastate = APP_FIRST_CHECK_START;
+            ee_WriteBytes(&t_u8_otastate,0x00,1);
+
+            System_SoftwareReset();//复位
         }
         else
         {
           //解密不成功，直接跳转APP程序，不进行其他操作
           log_e("BOOT Download Failed!");
+              /*·初始化内部外部状态机*/
+              t_u8_otastate = NO_APP_UPDATE;
+              ee_WriteBytes(&t_u8_otastate,0x00,1);
+          //
           Jump2App();
+              /*软件复位*/
+              System_SoftwareReset();
         }
+    break;
+    case APP_FIRST_CHECK_START://0x33--
+      log_a("APP_FIRST_CHECK_START");
+      t_u8_otastate = APP_FIRST_CHECKING;
+      ee_WriteBytes(&t_u8_otastate,0x00,1);
+      IWDG_Init(IWDG_Prescaler_64,3000);//初始化看门狗  6s时间
+      Jump2App(); ///这里将外部的状态码写为44，只有这个情况是正确的，调整之后就不会复位了
+      /**APP里边的代码也是判断外部状态器里面是不是44
+       * 如果是的话，把它刷新成00，然后等待 看门狗6s进行复位 就会自动跳转
+       */
+     /**但是你这里在APP运行过程中进行复位之后，岂不是重新启动了 执行BL代码就是切换到下面那个分支，然后再进行复位，就重新来了
+      * 是的，但是最后如果是no APP update也没有按下按键的话，还是会正常跳转到APP运行代码
+     */
+    break;
 
-      
-      break;
+    case APP_FIRST_CHECKING://0x44
+      t_u8_otastate = NO_APP_UPDATE;
+      ee_WriteBytes(&t_u8_otastate,0x00,1);
+
+      System_SoftwareReset();//复位
+      /** 如果**APP不能正常运行的话，也是复位之后将参数初始化**，但是好像没有回滚的机制 */
+      // /*6.如果运行到这一步，说明数据无效，把外部A区的数据搬运到App中*/
+      //       ExA_To_App();
+      //       /*再执行一次跳转*/
+      //       Jump2App();
+    break;
+
     default:
-
       /*NO action*/
-      break;
+    break;
   }
 }
 /**
@@ -579,6 +642,8 @@ int8_t External_AES_Backup2App(int32_t fl_size){
   }
   return 0;
 #endif
+
+
 
 int8_t AES_Backup2App(int32_t fl_size){
     uint32_t FlashDestination = ApplicationAddress;//APP地址        08008000

@@ -47,6 +47,8 @@ void Key_IO_Init(void)
 
 uint8_t Key_Scan(void)
 {
+  /* 这个消抖的历程是
+  好像是之前AI说的，一个不阻塞的delay加上超时检测，按下超时检测的按键*/
 	    // 第一次检测
     if(GPIO_ReadInputDataBit(GPIOA, GPIO_Pin_0) == Bit_RESET)
     {
@@ -71,6 +73,7 @@ while(GPIO_ReadInputDataBit(GPIOA, GPIO_Pin_0) == Bit_RESET && --timeout);
 //     }
 // }
 // return 0;
+
 //    if(GPIO_ReadInputDataBit(GPIOA,GPIO_Pin_0) == Bit_RESET)
 //    {
 //      Delay(50);////////致命阻塞
