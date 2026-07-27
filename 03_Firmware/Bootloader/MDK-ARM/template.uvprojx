@@ -336,7 +336,7 @@
               <MiscControls></MiscControls>
               <Define>USE_STDPERIPH_DRIVER,STM32F411xE</Define>
               <Undefine></Undefine>
-              <IncludePath>..\MDK-ARM;..\Core\Inc;..\Drivers\STM32F4xx_StdPeriph_Driver\inc;..\Drivers\CMSIS\Device\ST\STM32F4xx\Include;..\Drivers\CMSIS\Include;..\Middlewares\easylogger\inc;..\Middlewares\RTT;..\Task\BL_JMP;..\Task\Debug;..\Middlewares\Ymodem;..\Middlewares\AES;..\BSP\W25Qxx;..\Bsp\AT24Cxx_Driver</IncludePath>
+              <IncludePath>..\MDK-ARM;..\Core\Inc;..\Drivers\STM32F4xx_StdPeriph_Driver\inc;..\Drivers\CMSIS\Device\ST\STM32F4xx\Include;..\Drivers\CMSIS\Include;..\Middlewares\easylogger\inc;..\Middlewares\RTT;..\Task\BL_JMP;..\Task\Debug;..\Middlewares\Ymodem;..\Middlewares\AES;..\BSP\W25Qxx;..\Bsp\AT24Cxx_Driver;..\Middlewares\CRC\include</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -1712,6 +1712,36 @@
               <FileName>iic.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\Bsp\AT24Cxx_Driver\iic.c</FilePath>
+            </File>
+          </Files>
+        </Group>
+        <Group>
+          <GroupName>Middlewares/CRC</GroupName>
+          <Files>
+            <File>
+              <FileName>crc16.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Middlewares\CRC\src\crc16.c</FilePath>
+            </File>
+            <File>
+              <FileName>crc32.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Middlewares\CRC\src\crc32.c</FilePath>
+            </File>
+            <File>
+              <FileName>crcccitt.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Middlewares\CRC\src\crcccitt.c</FilePath>
+            </File>
+            <File>
+              <FileName>crcdnp.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Middlewares\CRC\src\crcdnp.c</FilePath>
+            </File>
+            <File>
+              <FileName>crckrmit.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Middlewares\CRC\src\crckrmit.c</FilePath>
             </File>
           </Files>
         </Group>

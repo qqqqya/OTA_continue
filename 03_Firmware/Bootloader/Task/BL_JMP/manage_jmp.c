@@ -263,7 +263,7 @@ int8_t App_To_ExA(int32_t fl_size){
   }
   Erase_Flash_Block(BLOCK_1);//擦除A区--只是清除结构体---
   //真正清除A区的数据的操作是在write data, 里面会通过写spi指令和24位地址来进行擦除
-  W25Q64_WriteData(BLOCK_1,(u32 *)flash_des,fl_size);//将当前的APP程序搬运到外部flash A区
+  W25Q64_WriteData(BLOCK_1,(u8 *)flash_des,fl_size);//将当前的APP程序搬运到外部flash A区
   W25Q64_WriteData_End(BLOCK_1);
   
   return 0;

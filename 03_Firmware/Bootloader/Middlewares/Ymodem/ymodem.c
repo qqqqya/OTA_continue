@@ -30,6 +30,7 @@
 #include "manage_jmp.h"//application address
 #include "Flash.h"  //擦除函数
 #include "w25qxx_Handler.h"  //为外部flash 提供函数
+#include "checksum.h"  //crc16函数--CRC相关的本地校验等等
 
 /* Private typedef -----------------------------------------------------------*/
 /* Private define ------------------------------------------------------------*/
@@ -136,6 +137,16 @@ static int32_t Receive_Packet (uint8_t *data, int32_t *length, uint32_t timeout)
   {
     return -1;
   }
+
+    //CRC check
+  uint16_t u16_CrcCheckData = crc_xmodem((data + PACKET_HEADER),packet_size);
+  uint16_t u16_CrcReceiveData = *(data + PACKET_HEADER + packet_size) << 8;
+  u16_CrcReceiveData += *(data + PACKET_HEADER + packet_size + 1);
+  if(u16_CrcCheckData != u16_CrcReceiveData)
+  {
+    return -1;
+  }
+
   *length = packet_size;
   return 0;
 }
@@ -276,7 +287,7 @@ int32_t Ymodem_Receive (uint8_t *buf)
             Send_Byte(CA);
             return 0;
           }
-          Send_Byte(CRC16);
+          Send_Byte(CRC16);//////send C here
           break;
       }
       if (file_done != 0)
