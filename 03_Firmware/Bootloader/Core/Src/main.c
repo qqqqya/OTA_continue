@@ -24,6 +24,15 @@
 // STM32F411 外部晶振25Mhz，考虑到USB使用，内部频率设置为96Mhz
 // 需要100mhz,自行修改system_stm32f4xx.c
 
+
+//uint32_t g_JumpInit __attribute__((at(0x20010000), zero_init));
+uint32_t  g_JumpInit __attribute__((at(0x2001FFF0)));//将这个变量放在这个地址
+//这个地址存放的是非初始化的变量，在SCT中有设定
+extern  pFunc Jump2Application;//函数指针类型--变量 
+                        //完全等价与 void (*Jump2Application)(void) 
+
+extern  uint32_t JumpAddress;//跳转地址
+
 /** @addtogroup Template_Project
   * @{
   */
@@ -52,6 +61,11 @@ extern uint8_t au8_test[1024]; //测试数据缓存
 
 int main(void)
 {
+  if(g_JumpInit == 0x55AA55AA)
+	{
+		  g_JumpInit = 0xFFFFFFFF;
+		  Jump2App();
+  }
  	/* Enable Clock Security System(CSS): this will generate an NMI exception
       when HSE clock fails *****************************************************/
    RCC_ClockSecuritySystemCmd(ENABLE);

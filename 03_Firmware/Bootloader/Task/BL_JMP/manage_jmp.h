@@ -4,6 +4,7 @@
 #include "main.h"
 #include "aes.h"
 #include "w25qxx_Handler.h"
+typedef void (*pFunc)(void);      //pFunc 是变量名'，类型是 void (*)(void)。
 
 #define FALSH_BASE_ADDR  ((uint32_t)0x08000000)//+ 0x00019000
 // #define FALSH_BASE_ADDR 0x08000000//+ 0x00019000

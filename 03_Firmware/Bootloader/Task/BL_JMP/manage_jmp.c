@@ -36,8 +36,8 @@
 #include "ymodem.h"
 #include "iwdg.h"
 
+extern uint32_t  g_JumpInit __attribute__((at(0x2001FFF0)));//这个地址存放的是非初始化的变量，在SCT中有设定
 
-typedef void (*pFunc)(void);      //pFunc 是变量名'，类型是 void (*)(void)。
 // pFunc Jump2Application;//函数指针类型--变量 
                         //完全等价与 void (*Jump2Application)(void) 
   pFunc Jump2Application;//函数指针类型--变量 
@@ -114,12 +114,15 @@ void Ota_statemanage(void){
       }/// end if(Key_Scan())
       else
       {
-              /*·初始化内部外部状态机*/
-              t_u8_otastate = NO_APP_UPDATE;
-              ee_WriteBytes(&t_u8_otastate,0x00,1);
-         Jump2App();//KEY_Scan() 没有按下，直接跳转APP程序
-              /*软件复位*/
+        g_JumpInit = 0x55AA55AA;
               System_SoftwareReset();
+
+        //       /*·初始化内部外部状态机*/
+        //       t_u8_otastate = NO_APP_UPDATE;
+        //       ee_WriteBytes(&t_u8_otastate,0x00,1);
+        //  Jump2App();//KEY_Scan() 没有按下，直接跳转APP程序
+        //       /*软件复位*/
+        //       System_SoftwareReset();
      }
     break;
 

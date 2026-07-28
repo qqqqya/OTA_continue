@@ -1,0 +1,46 @@
+      Code (inc. data)   RO Data    RW Data    ZI Data      Debug   Object Name
+      1008          0        558          0        256          0   aes.o
+       262          0          0          0          0          0   at24cxx_driver.o
+       312          0          0          0          0          0   common.o
+       190          0          0          1        512          0   crcccitt.o
+        60          0          0          0          0          0   debug_log.o
+      2880          0        297         52       1272          0   elog.o
+        32          0          0          0          0          0   elog_port.o
+       268          0         35          0          0          0   elog_utils.o
+       326          0         48          0          0          0   flash.o
+       180          0          0          0          0          0   gpio.o
+       582          0          0          0          0          0   iic.o
+        36          0          0          0          0          0   iwdg.o
+       404          0          5          4         20          0   main.o
+      1508          0         31         58       5120          0   manage_jmp.o
+        20          0          0          0          0          0   misc.o
+       534          0          0          0      10424          0   segger_rtt.o
+       628          0          0          0          0          0   spi.o
+        64          0        408          0       1536          0   startup_stm32f411xe.o
+       390          0          0          0          0          0   stm32f4xx_flash.o
+       250          0          0          0          0          0   stm32f4xx_gpio.o
+        80          0          0          4          0          0   stm32f4xx_it.o
+        68          0          0          0          0          0   stm32f4xx_iwdg.o
+       432          0          0         16          0          0   stm32f4xx_rcc.o
+       118          0          0          0          0          0   stm32f4xx_spi.o
+        40          0          0          0          0          0   stm32f4xx_tim.o
+       270          0          0          0          0          0   stm32f4xx_usart.o
+       504          0          0         20          0          0   system_stm32f4xx.o
+         2          0          0          0          0          0   tim.o
+       202          0          0          0          0          0   usart.o
+       826          0          0          0         28          0   w25qxx.o
+      1416          0          0          0       8232          0   w25qxx_handler.o
+       712          0          0         24        256          0   ymodem.o
+Object Totals
+
+Memory Map of the image
+
+	Load Region LR_IROM1 
+
+		Execution Region ER_IROM1 (Exec base: 0x08000000, Size: 0x000066AC, Max: 0x00008000, END)
+
+		Execution Region RW_IRAM1 (Exec base: 0x20000000, Size: 0x00006D20, Max: 0x0001FFF0, END)
+
+		Execution Region MYRAM (Exec base: 0x2001FFF0, Size: 0x00000004, Max: 0x0000000F, END)
+
+Image component sizes
