@@ -91,12 +91,11 @@ int main(void)
    log_a("This is Bootloader!");
 
    SPI1_Init();
-   W25Q64_Init();
+   W25Q64_Init(); //使用SFUD初始化
    ee_CheckOk();
 	//Ymodem_Receive(au8_test);
 //JumpToApp();
 //  uint8_t au8_test[1024]; 
-
   Ota_statemanage();
   
  int32_t fil_size = 0;

@@ -24,6 +24,7 @@
 /* Includes ------------------------------------------------------------------*/
 #include "w25qxx_Handler.h"
 #include "w25qxx.h"
+#include "sfud_adapter.h"  // 使用SFUD适配层
 /* Private typedef -----------------------------------------------------------*/
 /* Private define ------------------------------------------------------------*/
 /* Private macro -------------------------------------------------------------*/
@@ -41,7 +42,10 @@ static st_W25Q_Handler s_st_W25Q_Handler_1[2];
  */
 uint32_t Read_BlockSize(u8 block_index)
 {
-    return s_st_W25Q_Handler_1[block_index].write_index;
+    // return s_st_W25Q_Handler_1[block_index].write_index;
+
+    // 从SFUD适配层读取块大小
+    return SFUD_Read_BlockSize(block_index);
 }
 /* 
  * @brief 初始化W25Q64 初始化两个区域，A区 block0,B区 block1
@@ -50,7 +54,10 @@ uint32_t Read_BlockSize(u8 block_index)
  */
 void W25Q64_Init(void)
 {
-    W25Qx_Init();
+    // W25Qx_Init();
+    // 使用SFUD初始化替换原有的W25Qx_Init
+    SFUD_W25Q64_Init();
+
     s_st_W25Q_Handler_1[0].read_index = 0;
     s_st_W25Q_Handler_1[0].read_sector_index = 0;
     s_st_W25Q_Handler_1[0].write_databuf_index = 0;
@@ -71,7 +78,9 @@ void W25Q64_Init(void)
  */
 u8 W25Q64_EraseChip(void)
 {
-    if(0 == W25Qx_Erase_Chip())
+    // if(0 == W25Qx_Erase_Chip())
+    // 使用SFUD擦除整个芯片
+    if(1 == SFUD_W25Q64_EraseChip())
     {
     s_st_W25Q_Handler_1[0].read_index = 0;
     s_st_W25Q_Handler_1[0].read_sector_index = 0;
@@ -96,6 +105,9 @@ u8 W25Q64_EraseChip(void)
  */
 u8 Erase_Flash_Block(u8 block_index){
 
+    // 使用SFUD擦除Flash块
+	SFUD_Erase_Flash_Block(block_index);//内部原理  SPi指令擦除
+
     s_st_W25Q_Handler_1[block_index].read_index = 0;
     s_st_W25Q_Handler_1[block_index].read_sector_index = 0;
     s_st_W25Q_Handler_1[block_index].write_databuf_index = 0;
@@ -110,6 +122,9 @@ u8 W25Q64_SetBlockIndex(u8 block_index, u32 app_size)
     s_st_W25Q_Handler_1[block_index].write_sector_index= app_size / BLOCK_SIZE;
     /*2.计算databuf_index---4096max 直接取余*/
     s_st_W25Q_Handler_1[block_index].write_databuf_index= app_size % BLOCK_SIZE;
+
+     // 同时设置SFUD适配层的块参数
+    SFUD_SetBlockParmeter(block_index, app_size);
     return 0;
 }
 /**
@@ -138,29 +153,58 @@ u8 W25Q64_WriteData(u8 block_index, u8 *data, u32 length)
             //擦除1个sector
             addr = W25Qx_Para.SUBSECTOR_SIZE * s_st_W25Q_Handler_1[block_index].write_sector_index;
             addr += block_index * BLOCK_SIZE;////////计算block的偏移地址
-            W25Qx_Erase_Block(addr);
-            W25Qx_WriteEnable();
-            //写满了一个sector，执行写入操作   4096个byte
-            for(u8 j = 0; j < 16; j++)///逐page写入  256个byte
+            
+            // W25Qx_Erase_Block(addr);
+            // W25Qx_WriteEnable();
+            // //写满了一个sector，执行写入操作   4096个byte
+            // for(u8 j = 0; j < 16; j++)///逐page写入  256个byte
+            // {
+            //     //获取当前写入地址
+            //     addr = (W25Qx_Para.SUBSECTOR_SIZE * s_st_W25Q_Handler_1[block_index].write_sector_index) + \
+            //             (W25Qx_Para.PAGE_SIZE * j);
+            //             addr += block_index * BLOCK_SIZE;////////计算block的偏移地址
+            //     //执行写入操作
+            //     index = W25Qx_Para.PAGE_SIZE * j;
+            //     W25Qx_Write(&s_st_W25Q_Handler_1[block_index].databuf[index],addr,W25Qx_Para.PAGE_SIZE);
+            // }
+            // s_st_W25Q_Handler_1[block_index].write_sector_index++;
+            // //记录总的写入数据长度
+            // s_st_W25Q_Handler_1[block_index].write_index += W25Qx_Para.SUBSECTOR_SIZE;
+
+             /**   使用SFUD写入整个扇区数据     */ 
+            uint32_t write_addr = (W25Qx_Para.SUBSECTOR_SIZE *\
+                 s_st_W25Q_Handler_1[block_index].write_sector_index) + (block_index * BLOCK_SIZE);
+            
+            // 直接使用SFUD的擦除写入功能
+            if(SFUD_SUCCESS == sfud_erase_write(sfud_get_device(SFUD_W25Q64_DEVICE_INDEX), write_addr, W25Qx_Para.SUBSECTOR_SIZE, s_st_W25Q_Handler_1[block_index].databuf))
             {
-                //获取当前写入地址
-                addr = (W25Qx_Para.SUBSECTOR_SIZE * s_st_W25Q_Handler_1[block_index].write_sector_index) + \
-                        (W25Qx_Para.PAGE_SIZE * j);
-                        addr += block_index * BLOCK_SIZE;////////计算block的偏移地址
-                //执行写入操作
-                index = W25Qx_Para.PAGE_SIZE * j;
-                W25Qx_Write(&s_st_W25Q_Handler_1[block_index].databuf[index],addr,W25Qx_Para.PAGE_SIZE);
+                s_st_W25Q_Handler_1[block_index].write_sector_index++;
+                s_st_W25Q_Handler_1[block_index].write_index += W25Qx_Para.SUBSECTOR_SIZE;
             }
-            s_st_W25Q_Handler_1[block_index].write_sector_index++;
-            //记录总的写入数据长度
-            s_st_W25Q_Handler_1[block_index].write_index += W25Qx_Para.SUBSECTOR_SIZE;
+
         }
+
     }
     return 0;
 }
 
 u8 W25Q64_WriteData_End(u8 block_index)
 {
+        if(0 != s_st_W25Q_Handler_1[block_index].write_databuf_index)
+    {
+        // 使用SFUD写入剩余的数据
+        uint32_t write_addr = (4096 * s_st_W25Q_Handler_1[block_index].write_sector_index) + (block_index * BLOCK_SIZE);
+        
+        if(SFUD_SUCCESS == sfud_erase_write(sfud_get_device(SFUD_W25Q64_DEVICE_INDEX), write_addr, 
+                                           s_st_W25Q_Handler_1[block_index].write_databuf_index, 
+                                           s_st_W25Q_Handler_1[block_index].databuf))
+        {
+            s_st_W25Q_Handler_1[block_index].write_index += s_st_W25Q_Handler_1[block_index].write_databuf_index;
+            s_st_W25Q_Handler_1[block_index].write_databuf_index = 0;
+        }
+    }
+    return 0;
+#if 0
     u32 addr = 0;
     u16 index = 0;
     u8  page_size = 0;
@@ -201,6 +245,7 @@ u8 W25Q64_WriteData_End(u8 block_index)
         s_st_W25Q_Handler_1[block_index].write_index += s_st_W25Q_Handler_1[block_index].write_databuf_index;
     }
     return 0;
+    #endif
 }
 
 /*每次读取一个扇区的数据，外部接口需要一个4096的buffer
@@ -228,9 +273,17 @@ u8 W25Q64_ReadData(u8 block_index, u8 *data, u16 *length)
             *length = W25Qx_Para.SUBSECTOR_SIZE;//4k size
             addr = s_st_W25Q_Handler_1[block_index].read_sector_index * W25Qx_Para.SUBSECTOR_SIZE;
             addr += block_index * BLOCK_SIZE;////////计算block的偏移地址
-            if(0 != W25Qx_Read(data,addr,*length))
+
+            // if(0 != W25Qx_Read(data,addr,*length))
+            //     return 2;
+            // s_st_W25Q_Handler_1[block_index].read_sector_index++;
+                        // 使用SFUD读取数据
+            uint32_t read_addr = s_st_W25Q_Handler_1[block_index].read_sector_index\
+             * W25Qx_Para.SUBSECTOR_SIZE + (block_index * BLOCK_SIZE);
+            if(SFUD_SUCCESS != sfud_read(sfud_get_device(SFUD_W25Q64_DEVICE_INDEX), read_addr, *length, data))
                 return 2;
             s_st_W25Q_Handler_1[block_index].read_sector_index++;
+
         }
         else
         {
@@ -238,8 +291,15 @@ u8 W25Q64_ReadData(u8 block_index, u8 *data, u16 *length)
             *length = s_st_W25Q_Handler_1[block_index].write_index - s_st_W25Q_Handler_1[block_index].read_index;
             addr = s_st_W25Q_Handler_1[block_index].read_sector_index * W25Qx_Para.SUBSECTOR_SIZE;
                 addr += block_index * BLOCK_SIZE;////////计算block的偏移地址
-            if(0 != W25Qx_Read(data,addr,*length))
+            
+            // if(0 != W25Qx_Read(data,addr,*length))
+            //     return 2;
+                        // 使用SFUD读取数据
+            uint32_t read_addr2 = s_st_W25Q_Handler_1[block_index].read_sector_index\
+             * W25Qx_Para.SUBSECTOR_SIZE + (block_index * BLOCK_SIZE);
+            if(SFUD_SUCCESS != sfud_read(sfud_get_device(SFUD_W25Q64_DEVICE_INDEX), read_addr2, *length, data))
                 return 2;
+
         }
         s_st_W25Q_Handler_1[block_index].read_index += *length;
         return 0;

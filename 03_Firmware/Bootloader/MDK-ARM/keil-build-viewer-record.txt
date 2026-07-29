@@ -15,6 +15,10 @@
       1508          0         31         58       5120          0   manage_jmp.o
         20          0          0          0          0          0   misc.o
        534          0          0          0      10424          0   segger_rtt.o
+      3512          0       1341        116        261          0   sfud.o
+       136          0          0         20          0          0   sfud_adapter.o
+       224          0          0          0          0          0   sfud_port.o
+      1302          0        323          0          0          0   sfud_sfdp.o
        628          0          0          0          0          0   spi.o
         64          0        408          0       1536          0   startup_stm32f411xe.o
        390          0          0          0          0          0   stm32f4xx_flash.o
@@ -28,8 +32,8 @@
        504          0          0         20          0          0   system_stm32f4xx.o
          2          0          0          0          0          0   tim.o
        202          0          0          0          0          0   usart.o
-       826          0          0          0         28          0   w25qxx.o
-      1416          0          0          0       8232          0   w25qxx_handler.o
+         0          0          0          0         28          0   w25qxx.o
+      1260          0          0          0       8232          0   w25qxx_handler.o
        712          0          0         24        256          0   ymodem.o
 Object Totals
 
@@ -37,9 +41,9 @@ Memory Map of the image
 
 	Load Region LR_IROM1 
 
-		Execution Region ER_IROM1 (Exec base: 0x08000000, Size: 0x000066AC, Max: 0x00008000, END)
+		Execution Region ER_IROM1 (Exec base: 0x08000000, Size: 0x000077D8, Max: 0x00008000, END)
 
-		Execution Region RW_IRAM1 (Exec base: 0x20000000, Size: 0x00006D20, Max: 0x0001FFF0, END)
+		Execution Region RW_IRAM1 (Exec base: 0x20000000, Size: 0x00006EB0, Max: 0x0001FFF0, END)
 
 		Execution Region MYRAM (Exec base: 0x2001FFF0, Size: 0x00000004, Max: 0x0000000F, END)
 

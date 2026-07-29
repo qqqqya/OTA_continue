@@ -147,6 +147,8 @@ u8 SPI1_WriteByte(u8 *WriteData, u16 dataSize, u32 timeout)
             txflow = 0;
         }
 
+        /* SPA接收是一体的，如果你只发不SHOU的话，你就要发0xFF的信号
+            这个数据一般叫做dummy，一般是FF的信号*/
         // 2. 接收逻辑：当接收缓冲区有数据，且还有数据要收
         if((SPI_I2S_GetFlagStatus(SPI1,SPI_I2S_FLAG_RXNE) !=RESET) && (rxsize > 0) && (txflow==0))
         {

@@ -34,10 +34,10 @@
 
 [region info]
 [load region] LR_IROM1
-	[execution region] ER_IROM1, 0x08000000, 0x00008000, 0x000066AC [memory type] 2 [memory ID] 3
+	[execution region] ER_IROM1, 0x08000000, 0x00008000, 0x000077D8 [memory type] 2 [memory ID] 3
 
-	[execution region] RW_IRAM1, 0x20000000, 0x0001FFF0, 0x00006D20 [memory type] 1 [memory ID] 2
-		[ZI block] addr: 0x200000B8, size: 0x00006C68 (27752)
+	[execution region] RW_IRAM1, 0x20000000, 0x0001FFF0, 0x00006EB0 [memory type] 1 [memory ID] 2
+		[ZI block] addr: 0x20000140, size: 0x00006D70 (28016)
 
 	[execution region] MYRAM, 0x2001FFF0, 0x0000000F, 0x00000004 [memory type] 1 [memory ID] 2
 		[ZI block] addr: 0x2001FFF0, size: 0x00000004 (4)
@@ -63,6 +63,10 @@
 [object name] manage_jmp.o               [path] ..\Task\BL_JMP\manage_jmp.c
 [object name] misc.o                     [path] ..\Drivers\STM32F4xx_StdPeriph_Driver\src\misc.c
 [object name] segger_rtt.o               [path] ..\Middlewares\RTT\SEGGER_RTT.c
+[object name] sfud.o                     [path] ..\Middlewares\sfud\src\sfud.c
+[object name] sfud_adapter.o             [path] ..\Middlewares\sfud\sfud_adapter.c
+[object name] sfud_port.o                [path] ..\Middlewares\sfud\port\sfud_port.c
+[object name] sfud_sfdp.o                [path] ..\Middlewares\sfud\src\sfud_sfdp.c
 [object name] spi.o                      [path] ..\Core\Src\Spi.c
 [object name] startup_stm32f411xe.o      [path] .\startup_stm32f411xe.s
 [object name] stm32f4xx_flash.o          [path] ..\Drivers\STM32F4xx_StdPeriph_Driver\src\stm32f4xx_flash.c
@@ -137,11 +141,16 @@
 [old name] crcccitt.c                 [type] 1   [path] ..\Middlewares\CRC\src\crcccitt.c
 [old name] crcdnp.c                   [type] 1   [path] ..\Middlewares\CRC\src\crcdnp.c
 [old name] crckrmit.c                 [type] 1   [path] ..\Middlewares\CRC\src\crckrmit.c
+[old name] sfud_adapter.c             [type] 1   [path] ..\Middlewares\sfud\sfud_adapter.c
+[old name] sfud.c                     [type] 1   [path] ..\Middlewares\sfud\src\sfud.c
+[old name] sfud_sfdp.c                [type] 1   [path] ..\Middlewares\sfud\src\sfud_sfdp.c
+[old name] sfud_port.c                [type] 1   [path] ..\Middlewares\sfud\port\sfud_port.c
 
 [record region info]
 [load region] LR_IROM1
-	[execution region] ER_IROM1, 0x08000000, 0x00008000, 0x000066AC [type] 2 [ID] 3
-	[execution region] RW_IRAM1, 0x20000000, 0x00020000, 0x0001FFF4 [type] 1 [ID] 2
+	[execution region] ER_IROM1, 0x08000000, 0x00008000, 0x000077D0 [type] 2 [ID] 3
+	[execution region] RW_IRAM1, 0x20000000, 0x0001FFF0, 0x00006EB0 [type] 1 [ID] 2
+	[execution region] MYRAM, 0x2001FFF0, 0x0000000F, 0x00000004 [type] 1 [ID] 2
 -------------------------------------------------------------------------------------------------------------------------------
                                  FILE(s)                                |         RAM (byte)       |       FLASH (byte)       |
 -------------------------------------------------------------------------------------------------------------------------------
@@ -161,6 +170,10 @@
 ..\Task\BL_JMP\manage_jmp.c():                                          |        5178              |        1597              |
 ..\Drivers\STM32F4xx_StdPeriph_Driver\src\misc.c():                     |           0              |          20              |
 ..\Middlewares\RTT\SEGGER_RTT.c():                                      |       10424              |         534              |
+..\Middlewares\sfud\src\sfud.c():                                       |         377              |        4969              |
+..\Middlewares\sfud\sfud_adapter.c():                                   |          20              |         156              |
+..\Middlewares\sfud\port\sfud_port.c():                                 |           0              |         224  [+8]        |
+..\Middlewares\sfud\src\sfud_sfdp.c():                                  |           0              |        1625              |
 ..\Core\Src\Spi.c():                                                    |           0              |         628              |
 .\startup_stm32f411xe.s():                                              |        1536              |         472              |
 ..\Drivers\STM32F4xx_StdPeriph_Driver\src\stm32f4xx_flash.c():          |           0              |         390              |
@@ -174,24 +187,24 @@
 ..\Core\Src\system_stm32f4xx.c():                                       |          20              |         524              |
 ..\Core\Src\tim.c():                                                    |           0              |           2              |
 ..\Core\Src\Usart.c():                                                  |           0              |         202              |
-..\BSP\W25Qxx\w25qxx.c():                                               |          28              |         826              |
-..\BSP\W25Qxx\w25qxx_Handler.c():                                       |        8232              |        1416              |
+..\BSP\W25Qxx\w25qxx.c():                                               |          28              |           0              |
+..\BSP\W25Qxx\w25qxx_Handler.c():                                       |        8232              |        1260              |
 ..\Middlewares\Ymodem\ymodem.c():                                       |         280              |         736              |
 -------------------------------------------------------------------------------------------------------------------------------
 [memory print mode]: 0
 LR_IROM1
         RAM 1             [0x20000000 | 0x00020000 (131072)]
                 [zi start] 1   [zi end] 10
-                RW_IRAM1  [0x20000000]|¡ö¡õ¡õ¡õ¡õ¡õ¡õ¡õ¡õ¡õ________________________________________| (  27.2 KB / 127.9 KB )  21.3%  [-103124]
+                RW_IRAM1  [0x20000000]|¡ö¡õ¡õ¡õ¡õ¡õ¡õ¡õ¡õ¡õ________________________________________| (  27.6 KB / 127.9 KB )  21.6%  
                 [zi start] 0   [zi end] 13
-                MYRAM     [0x2001FFF0]|¡õ¡õ¡õ¡õ¡õ¡õ¡õ¡õ¡õ¡õ¡õ¡õ¡õ_____________________________________| (        4 /       15 )  26.7%  [NEW]
+                MYRAM     [0x2001FFF0]|¡õ¡õ¡õ¡õ¡õ¡õ¡õ¡õ¡õ¡õ¡õ¡õ¡õ_____________________________________| (        4 /       15 )  26.7%  
  
         FLASH 1           [0x08000000 | 0x00080000 (524288)]
-                ER_IROM1  [0x08000000]|¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö__________| (  25.6 KB /  32.0 KB )  80.2%  
+                ER_IROM1  [0x08000000]|¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö¡ö____| (  29.9 KB /  32.0 KB )  93.6%  [+8]
  
 [htm file path] D:\2STM32file_2025\0lixin\OTA_continue\03_Firmware\Bootloader\MDK-ARM\Objects\template.htm
-Maximum Stack Usage =       1296 bytes + Unknown(Functions without stacksize, Cycles, Untraceable Function Pointers)
+Maximum Stack Usage =       1376 bytes + Unknown(Functions without stacksize, Cycles, Untraceable Function Pointers)
  
 =============================================================================================================================
 
-run time: 0.170 s
+run time: 0.204 s

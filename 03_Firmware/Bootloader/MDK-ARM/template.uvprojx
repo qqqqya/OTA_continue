@@ -336,7 +336,7 @@
               <MiscControls></MiscControls>
               <Define>USE_STDPERIPH_DRIVER,STM32F411xE</Define>
               <Undefine></Undefine>
-              <IncludePath>..\MDK-ARM;..\Core\Inc;..\Drivers\STM32F4xx_StdPeriph_Driver\inc;..\Drivers\CMSIS\Device\ST\STM32F4xx\Include;..\Drivers\CMSIS\Include;..\Middlewares\easylogger\inc;..\Middlewares\RTT;..\Task\BL_JMP;..\Task\Debug;..\Middlewares\Ymodem;..\Middlewares\AES;..\BSP\W25Qxx;..\Bsp\AT24Cxx_Driver;..\Middlewares\CRC\include</IncludePath>
+              <IncludePath>..\MDK-ARM;..\Core\Inc;..\Drivers\STM32F4xx_StdPeriph_Driver\inc;..\Drivers\CMSIS\Device\ST\STM32F4xx\Include;..\Drivers\CMSIS\Include;..\Middlewares\easylogger\inc;..\Middlewares\RTT;..\Task\BL_JMP;..\Task\Debug;..\Middlewares\Ymodem;..\Middlewares\AES;..\BSP\W25Qxx;..\Bsp\AT24Cxx_Driver;..\Middlewares\CRC\include;..\Middlewares\sfud;..\Middlewares\sfud\inc</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -1747,6 +1747,31 @@
               <FileName>crckrmit.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\Middlewares\CRC\src\crckrmit.c</FilePath>
+            </File>
+          </Files>
+        </Group>
+        <Group>
+          <GroupName>Middlewares/sfud</GroupName>
+          <Files>
+            <File>
+              <FileName>sfud_adapter.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Middlewares\sfud\sfud_adapter.c</FilePath>
+            </File>
+            <File>
+              <FileName>sfud.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Middlewares\sfud\src\sfud.c</FilePath>
+            </File>
+            <File>
+              <FileName>sfud_sfdp.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Middlewares\sfud\src\sfud_sfdp.c</FilePath>
+            </File>
+            <File>
+              <FileName>sfud_port.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Middlewares\sfud\port\sfud_port.c</FilePath>
             </File>
           </Files>
         </Group>
